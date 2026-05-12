@@ -1,0 +1,1702 @@
+[
+  {
+    "global_rank": 1,
+    "tier_rank": 1,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Clodsire",
+    "slug": "clodsire-",
+    "source_id": "clodsire-",
+    "canonical_id": "clodsire"
+  },
+  {
+    "global_rank": 2,
+    "tier_rank": 2,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Tinkaton",
+    "slug": "tinkaton",
+    "source_id": "tinkaton",
+    "canonical_id": "tinkaton"
+  },
+  {
+    "global_rank": 3,
+    "tier_rank": 3,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Mandibuzz",
+    "slug": "mandibuzz",
+    "source_id": "mandibuzz",
+    "canonical_id": "mandibuzz"
+  },
+  {
+    "global_rank": 4,
+    "tier_rank": 4,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Shadow Drapion",
+    "slug": "shadow-drapion",
+    "source_id": "shadow-drapion",
+    "canonical_id": "drapion_shadow"
+  },
+  {
+    "global_rank": 5,
+    "tier_rank": 5,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Empoleon",
+    "slug": "empoleon",
+    "source_id": "empoleon",
+    "canonical_id": "empoleon"
+  },
+  {
+    "global_rank": 6,
+    "tier_rank": 6,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Shadow Empoleon",
+    "slug": "shadow-empoleon",
+    "source_id": "shadow-empoleon",
+    "canonical_id": "empoleon_shadow"
+  },
+  {
+    "global_rank": 7,
+    "tier_rank": 7,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Cradily",
+    "slug": "cradily",
+    "source_id": "cradily",
+    "canonical_id": "cradily"
+  },
+  {
+    "global_rank": 8,
+    "tier_rank": 8,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Dusclops",
+    "slug": "dusclops",
+    "source_id": "dusclops",
+    "canonical_id": "dusclops"
+  },
+  {
+    "global_rank": 9,
+    "tier_rank": 9,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Altaria",
+    "slug": "altaria",
+    "source_id": "altaria",
+    "canonical_id": "altaria"
+  },
+  {
+    "global_rank": 10,
+    "tier_rank": 10,
+    "tier": "S Tier",
+    "tier_weight": 1.0,
+    "name": "Azumarill",
+    "slug": "azumarill",
+    "source_id": "azumarill",
+    "canonical_id": "azumarill"
+  },
+  {
+    "global_rank": 11,
+    "tier_rank": 1,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Talonflame",
+    "slug": "shadow-talonflame",
+    "source_id": "shadow-talonflame",
+    "canonical_id": "talonflame_shadow"
+  },
+  {
+    "global_rank": 12,
+    "tier_rank": 2,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Annihilape",
+    "slug": "shadow-annihilape",
+    "source_id": "shadow-annihilape",
+    "canonical_id": "annihilape_shadow"
+  },
+  {
+    "global_rank": 13,
+    "tier_rank": 3,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Guzzlord",
+    "slug": "guzzlord",
+    "source_id": "guzzlord",
+    "canonical_id": "guzzlord"
+  },
+  {
+    "global_rank": 14,
+    "tier_rank": 4,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Regidrago",
+    "slug": "regidrago",
+    "source_id": "regidrago",
+    "canonical_id": "regidrago"
+  },
+  {
+    "global_rank": 15,
+    "tier_rank": 5,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Golisopod",
+    "slug": "golisopod",
+    "source_id": "golisopod",
+    "canonical_id": "golisopod"
+  },
+  {
+    "global_rank": 16,
+    "tier_rank": 6,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Toxapex",
+    "slug": "toxapex",
+    "source_id": "toxapex",
+    "canonical_id": "toxapex"
+  },
+  {
+    "global_rank": 17,
+    "tier_rank": 7,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Corviknight",
+    "slug": "corviknight",
+    "source_id": "corviknight",
+    "canonical_id": "corviknight"
+  },
+  {
+    "global_rank": 18,
+    "tier_rank": 8,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Mimikyu",
+    "slug": "mimikyu",
+    "source_id": "mimikyu",
+    "canonical_id": "mimikyu"
+  },
+  {
+    "global_rank": 19,
+    "tier_rank": 9,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Doublade",
+    "slug": "doublade",
+    "source_id": "doublade",
+    "canonical_id": "doublade"
+  },
+  {
+    "global_rank": 20,
+    "tier_rank": 10,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Diggersby",
+    "slug": "diggersby",
+    "source_id": "diggersby",
+    "canonical_id": "diggersby"
+  },
+  {
+    "global_rank": 21,
+    "tier_rank": 11,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Dedenne",
+    "slug": "dedenne",
+    "source_id": "dedenne",
+    "canonical_id": "dedenne"
+  },
+  {
+    "global_rank": 22,
+    "tier_rank": 12,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Drapion",
+    "slug": "drapion",
+    "source_id": "drapion",
+    "canonical_id": "drapion"
+  },
+  {
+    "global_rank": 23,
+    "tier_rank": 13,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Gastrodon - West Sea",
+    "slug": "gastrodon---west-sea",
+    "source_id": "gastrodon---west-sea",
+    "canonical_id": "gastrodon_west_sea"
+  },
+  {
+    "global_rank": 24,
+    "tier_rank": 14,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Dusknoir",
+    "slug": "shadow-dusknoir",
+    "source_id": "shadow-dusknoir",
+    "canonical_id": "dusknoir_shadow"
+  },
+  {
+    "global_rank": 25,
+    "tier_rank": 15,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Togekiss",
+    "slug": "togekiss",
+    "source_id": "togekiss",
+    "canonical_id": "togekiss"
+  },
+  {
+    "global_rank": 26,
+    "tier_rank": 16,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Gastrodon - East Sea",
+    "slug": "gastrodon---east-sea",
+    "source_id": "gastrodon---east-sea",
+    "canonical_id": "gastrodon_east_sea"
+  },
+  {
+    "global_rank": 27,
+    "tier_rank": 17,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Claydol",
+    "slug": "claydol",
+    "source_id": "claydol",
+    "canonical_id": "claydol"
+  },
+  {
+    "global_rank": 28,
+    "tier_rank": 18,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Forretress",
+    "slug": "forretress",
+    "source_id": "forretress",
+    "canonical_id": "forretress"
+  },
+  {
+    "global_rank": 29,
+    "tier_rank": 19,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Forretress",
+    "slug": "shadow-forretress",
+    "source_id": "shadow-forretress",
+    "canonical_id": "forretress_shadow"
+  },
+  {
+    "global_rank": 30,
+    "tier_rank": 20,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Quagsire",
+    "slug": "shadow-quagsire",
+    "source_id": "shadow-quagsire",
+    "canonical_id": "quagsire_shadow"
+  },
+  {
+    "global_rank": 31,
+    "tier_rank": 21,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Sableye",
+    "slug": "shadow-sableye",
+    "source_id": "shadow-sableye",
+    "canonical_id": "sableye_shadow"
+  },
+  {
+    "global_rank": 32,
+    "tier_rank": 22,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Quagsire",
+    "slug": "quagsire",
+    "source_id": "quagsire",
+    "canonical_id": "quagsire"
+  },
+  {
+    "global_rank": 33,
+    "tier_rank": 23,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Gligar",
+    "slug": "shadow-gligar",
+    "source_id": "shadow-gligar",
+    "canonical_id": "gligar_shadow"
+  },
+  {
+    "global_rank": 34,
+    "tier_rank": 24,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Feraligatr",
+    "slug": "shadow-feraligatr",
+    "source_id": "shadow-feraligatr",
+    "canonical_id": "feraligatr_shadow"
+  },
+  {
+    "global_rank": 35,
+    "tier_rank": 25,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Feraligatr",
+    "slug": "feraligatr",
+    "source_id": "feraligatr",
+    "canonical_id": "feraligatr"
+  },
+  {
+    "global_rank": 36,
+    "tier_rank": 26,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Furret",
+    "slug": "furret",
+    "source_id": "furret",
+    "canonical_id": "furret"
+  },
+  {
+    "global_rank": 37,
+    "tier_rank": 27,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Jumpluff",
+    "slug": "jumpluff",
+    "source_id": "jumpluff",
+    "canonical_id": "jumpluff"
+  },
+  {
+    "global_rank": 38,
+    "tier_rank": 28,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Jumpluff",
+    "slug": "shadow-jumpluff",
+    "source_id": "shadow-jumpluff",
+    "canonical_id": "jumpluff_shadow"
+  },
+  {
+    "global_rank": 39,
+    "tier_rank": 29,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Lapras",
+    "slug": "shadow-lapras",
+    "source_id": "shadow-lapras",
+    "canonical_id": "lapras_shadow"
+  },
+  {
+    "global_rank": 40,
+    "tier_rank": 30,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Marowak",
+    "slug": "shadow-marowak",
+    "source_id": "shadow-marowak",
+    "canonical_id": "marowak_shadow"
+  },
+  {
+    "global_rank": 41,
+    "tier_rank": 31,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Lapras",
+    "slug": "lapras",
+    "source_id": "lapras",
+    "canonical_id": "lapras"
+  },
+  {
+    "global_rank": 42,
+    "tier_rank": 32,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Dewgong",
+    "slug": "dewgong",
+    "source_id": "dewgong",
+    "canonical_id": "dewgong"
+  },
+  {
+    "global_rank": 43,
+    "tier_rank": 33,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Alolan Sandslash",
+    "slug": "alolan-sandslash",
+    "source_id": "alolan-sandslash",
+    "canonical_id": "sandslash_alolan"
+  },
+  {
+    "global_rank": 44,
+    "tier_rank": 34,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Alolan Sandslash",
+    "slug": "shadow-alolan-sandslash",
+    "source_id": "shadow-alolan-sandslash",
+    "canonical_id": "alolan_sandslash_shadow"
+  },
+  {
+    "global_rank": 45,
+    "tier_rank": 35,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Charizard",
+    "slug": "shadow-charizard",
+    "source_id": "shadow-charizard",
+    "canonical_id": "charizard_shadow"
+  },
+  {
+    "global_rank": 46,
+    "tier_rank": 36,
+    "tier": "A+ Tier",
+    "tier_weight": 0.92,
+    "name": "Shadow Blastoise",
+    "slug": "shadow-blastoise",
+    "source_id": "shadow-blastoise",
+    "canonical_id": "blastoise_shadow"
+  },
+  {
+    "global_rank": 47,
+    "tier_rank": 1,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Greninja",
+    "slug": "shadow-greninja",
+    "source_id": "shadow-greninja",
+    "canonical_id": "greninja_shadow"
+  },
+  {
+    "global_rank": 48,
+    "tier_rank": 2,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Giratina (Altered Forme)",
+    "slug": "shadow-giratina-altered-forme",
+    "source_id": "shadow-giratina-altered-forme",
+    "canonical_id": "giratina_altered_forme_shadow"
+  },
+  {
+    "global_rank": 49,
+    "tier_rank": 3,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Grumpig",
+    "slug": "shadow-grumpig",
+    "source_id": "shadow-grumpig",
+    "canonical_id": "grumpig_shadow"
+  },
+  {
+    "global_rank": 50,
+    "tier_rank": 4,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Galarian Weezing",
+    "slug": "shadow-galarian-weezing",
+    "source_id": "shadow-galarian-weezing",
+    "canonical_id": "galarian_weezing_shadow"
+  },
+  {
+    "global_rank": 51,
+    "tier_rank": 5,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Annihilape",
+    "slug": "annihilape",
+    "source_id": "annihilape",
+    "canonical_id": "annihilape"
+  },
+  {
+    "global_rank": 52,
+    "tier_rank": 6,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Arctibax",
+    "slug": "arctibax",
+    "source_id": "arctibax",
+    "canonical_id": "arctibax"
+  },
+  {
+    "global_rank": 53,
+    "tier_rank": 7,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Skeledirge",
+    "slug": "skeledirge",
+    "source_id": "skeledirge",
+    "canonical_id": "skeledirge"
+  },
+  {
+    "global_rank": 54,
+    "tier_rank": 8,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Spidops",
+    "slug": "spidops",
+    "source_id": "spidops",
+    "canonical_id": "spidops"
+  },
+  {
+    "global_rank": 55,
+    "tier_rank": 9,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Dragalge",
+    "slug": "dragalge",
+    "source_id": "dragalge",
+    "canonical_id": "dragalge"
+  },
+  {
+    "global_rank": 56,
+    "tier_rank": 10,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Pangoro",
+    "slug": "pangoro",
+    "source_id": "pangoro",
+    "canonical_id": "pangoro"
+  },
+  {
+    "global_rank": 57,
+    "tier_rank": 11,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Golurk",
+    "slug": "shadow-golurk",
+    "source_id": "shadow-golurk",
+    "canonical_id": "golurk_shadow"
+  },
+  {
+    "global_rank": 58,
+    "tier_rank": 12,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Greninja",
+    "slug": "greninja",
+    "source_id": "greninja",
+    "canonical_id": "greninja"
+  },
+  {
+    "global_rank": 59,
+    "tier_rank": 13,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Carbink",
+    "slug": "carbink",
+    "source_id": "carbink",
+    "canonical_id": "carbink"
+  },
+  {
+    "global_rank": 60,
+    "tier_rank": 14,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Goodra",
+    "slug": "goodra",
+    "source_id": "goodra",
+    "canonical_id": "goodra"
+  },
+  {
+    "global_rank": 61,
+    "tier_rank": 15,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Bastiodon",
+    "slug": "bastiodon",
+    "source_id": "bastiodon",
+    "canonical_id": "bastiodon"
+  },
+  {
+    "global_rank": 62,
+    "tier_rank": 16,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Abomasnow",
+    "slug": "abomasnow",
+    "source_id": "abomasnow",
+    "canonical_id": "abomasnow"
+  },
+  {
+    "global_rank": 63,
+    "tier_rank": 17,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Metang",
+    "slug": "metang",
+    "source_id": "metang",
+    "canonical_id": "metang"
+  },
+  {
+    "global_rank": 64,
+    "tier_rank": 18,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Spiritomb",
+    "slug": "spiritomb",
+    "source_id": "spiritomb",
+    "canonical_id": "spiritomb"
+  },
+  {
+    "global_rank": 65,
+    "tier_rank": 19,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Dusknoir",
+    "slug": "dusknoir",
+    "source_id": "dusknoir",
+    "canonical_id": "dusknoir"
+  },
+  {
+    "global_rank": 66,
+    "tier_rank": 20,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Abomasnow",
+    "slug": "shadow-abomasnow",
+    "source_id": "shadow-abomasnow",
+    "canonical_id": "abomasnow_shadow"
+  },
+  {
+    "global_rank": 67,
+    "tier_rank": 21,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Registeel",
+    "slug": "registeel",
+    "source_id": "registeel",
+    "canonical_id": "registeel"
+  },
+  {
+    "global_rank": 68,
+    "tier_rank": 22,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Whiscash",
+    "slug": "shadow-whiscash",
+    "source_id": "shadow-whiscash",
+    "canonical_id": "whiscash_shadow"
+  },
+  {
+    "global_rank": 69,
+    "tier_rank": 23,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Grumpig",
+    "slug": "grumpig",
+    "source_id": "grumpig",
+    "canonical_id": "grumpig"
+  },
+  {
+    "global_rank": 70,
+    "tier_rank": 24,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Whiscash",
+    "slug": "whiscash",
+    "source_id": "whiscash",
+    "canonical_id": "whiscash"
+  },
+  {
+    "global_rank": 71,
+    "tier_rank": 25,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Sableye",
+    "slug": "sableye",
+    "source_id": "sableye",
+    "canonical_id": "sableye"
+  },
+  {
+    "global_rank": 72,
+    "tier_rank": 26,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Miltank",
+    "slug": "miltank",
+    "source_id": "miltank",
+    "canonical_id": "miltank"
+  },
+  {
+    "global_rank": 73,
+    "tier_rank": 27,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Dunsparce",
+    "slug": "dunsparce",
+    "source_id": "dunsparce",
+    "canonical_id": "dunsparce"
+  },
+  {
+    "global_rank": 74,
+    "tier_rank": 28,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Swampert",
+    "slug": "swampert",
+    "source_id": "swampert",
+    "canonical_id": "swampert"
+  },
+  {
+    "global_rank": 75,
+    "tier_rank": 29,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Steelix",
+    "slug": "shadow-steelix",
+    "source_id": "shadow-steelix",
+    "canonical_id": "steelix_shadow"
+  },
+  {
+    "global_rank": 76,
+    "tier_rank": 30,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Scizor",
+    "slug": "scizor",
+    "source_id": "scizor",
+    "canonical_id": "scizor"
+  },
+  {
+    "global_rank": 77,
+    "tier_rank": 31,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Swampert",
+    "slug": "shadow-swampert",
+    "source_id": "shadow-swampert",
+    "canonical_id": "swampert_shadow"
+  },
+  {
+    "global_rank": 78,
+    "tier_rank": 32,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Shadow Typhlosion",
+    "slug": "shadow-typhlosion",
+    "source_id": "shadow-typhlosion",
+    "canonical_id": "typhlosion_shadow"
+  },
+  {
+    "global_rank": 79,
+    "tier_rank": 33,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Galarian Moltres",
+    "slug": "galarian-moltres",
+    "source_id": "galarian-moltres",
+    "canonical_id": "moltres_galarian"
+  },
+  {
+    "global_rank": 80,
+    "tier_rank": 34,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Galarian Weezing",
+    "slug": "galarian-weezing",
+    "source_id": "galarian-weezing",
+    "canonical_id": "weezing_galarian"
+  },
+  {
+    "global_rank": 81,
+    "tier_rank": 35,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Marowak",
+    "slug": "marowak",
+    "source_id": "marowak",
+    "canonical_id": "marowak"
+  },
+  {
+    "global_rank": 82,
+    "tier_rank": 36,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Blastoise",
+    "slug": "blastoise",
+    "source_id": "blastoise",
+    "canonical_id": "blastoise"
+  },
+  {
+    "global_rank": 83,
+    "tier_rank": 37,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Wigglytuff",
+    "slug": "wigglytuff",
+    "source_id": "wigglytuff",
+    "canonical_id": "wigglytuff"
+  },
+  {
+    "global_rank": 84,
+    "tier_rank": 38,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Charizard",
+    "slug": "charizard",
+    "source_id": "charizard",
+    "canonical_id": "charizard"
+  },
+  {
+    "global_rank": 85,
+    "tier_rank": 39,
+    "tier": "A Tier",
+    "tier_weight": 0.82,
+    "name": "Fearow",
+    "slug": "fearow",
+    "source_id": "fearow",
+    "canonical_id": "fearow"
+  },
+  {
+    "global_rank": 86,
+    "tier_rank": 1,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Altaria",
+    "slug": "shadow-altaria",
+    "source_id": "shadow-altaria",
+    "canonical_id": "altaria_shadow"
+  },
+  {
+    "global_rank": 87,
+    "tier_rank": 2,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Bellibolt",
+    "slug": "bellibolt",
+    "source_id": "bellibolt",
+    "canonical_id": "bellibolt"
+  },
+  {
+    "global_rank": 88,
+    "tier_rank": 3,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Lokix",
+    "slug": "lokix",
+    "source_id": "lokix",
+    "canonical_id": "lokix"
+  },
+  {
+    "global_rank": 89,
+    "tier_rank": 4,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Kommo-o",
+    "slug": "kommo-o",
+    "source_id": "kommo-o",
+    "canonical_id": "kommo_o"
+  },
+  {
+    "global_rank": 90,
+    "tier_rank": 5,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Florges",
+    "slug": "florges",
+    "source_id": "florges",
+    "canonical_id": "florges"
+  },
+  {
+    "global_rank": 91,
+    "tier_rank": 6,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Aurorus",
+    "slug": "aurorus",
+    "source_id": "aurorus",
+    "canonical_id": "aurorus"
+  },
+  {
+    "global_rank": 92,
+    "tier_rank": 7,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Malamar",
+    "slug": "malamar",
+    "source_id": "malamar",
+    "canonical_id": "malamar"
+  },
+  {
+    "global_rank": 93,
+    "tier_rank": 8,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Golurk",
+    "slug": "golurk",
+    "source_id": "golurk",
+    "canonical_id": "golurk"
+  },
+  {
+    "global_rank": 94,
+    "tier_rank": 9,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Whimsicott",
+    "slug": "whimsicott",
+    "source_id": "whimsicott",
+    "canonical_id": "whimsicott"
+  },
+  {
+    "global_rank": 95,
+    "tier_rank": 10,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Bastiodon",
+    "slug": "shadow-bastiodon",
+    "source_id": "shadow-bastiodon",
+    "canonical_id": "bastiodon_shadow"
+  },
+  {
+    "global_rank": 96,
+    "tier_rank": 11,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Gliscor",
+    "slug": "gliscor",
+    "source_id": "gliscor",
+    "canonical_id": "gliscor"
+  },
+  {
+    "global_rank": 97,
+    "tier_rank": 12,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Latias",
+    "slug": "shadow-latias",
+    "source_id": "shadow-latias",
+    "canonical_id": "latias_shadow"
+  },
+  {
+    "global_rank": 98,
+    "tier_rank": 13,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Walrein",
+    "slug": "walrein",
+    "source_id": "walrein",
+    "canonical_id": "walrein"
+  },
+  {
+    "global_rank": 99,
+    "tier_rank": 14,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Lickilicky",
+    "slug": "lickilicky",
+    "source_id": "lickilicky",
+    "canonical_id": "lickilicky"
+  },
+  {
+    "global_rank": 100,
+    "tier_rank": 15,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Jirachi",
+    "slug": "jirachi",
+    "source_id": "jirachi",
+    "canonical_id": "jirachi"
+  },
+  {
+    "global_rank": 101,
+    "tier_rank": 16,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Latias",
+    "slug": "latias",
+    "source_id": "latias",
+    "canonical_id": "latias"
+  },
+  {
+    "global_rank": 102,
+    "tier_rank": 17,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Torkoal",
+    "slug": "torkoal",
+    "source_id": "torkoal",
+    "canonical_id": "torkoal"
+  },
+  {
+    "global_rank": 103,
+    "tier_rank": 18,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Walrein",
+    "slug": "shadow-walrein",
+    "source_id": "shadow-walrein",
+    "canonical_id": "walrein_shadow"
+  },
+  {
+    "global_rank": 104,
+    "tier_rank": 19,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Cradily",
+    "slug": "shadow-cradily",
+    "source_id": "shadow-cradily",
+    "canonical_id": "cradily_shadow"
+  },
+  {
+    "global_rank": 105,
+    "tier_rank": 20,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Ludicolo",
+    "slug": "ludicolo",
+    "source_id": "ludicolo",
+    "canonical_id": "ludicolo"
+  },
+  {
+    "global_rank": 106,
+    "tier_rank": 21,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Steelix",
+    "slug": "steelix",
+    "source_id": "steelix",
+    "canonical_id": "steelix"
+  },
+  {
+    "global_rank": 107,
+    "tier_rank": 22,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Donphan",
+    "slug": "shadow-donphan",
+    "source_id": "shadow-donphan",
+    "canonical_id": "donphan_shadow"
+  },
+  {
+    "global_rank": 108,
+    "tier_rank": 23,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Umbreon",
+    "slug": "umbreon",
+    "source_id": "umbreon",
+    "canonical_id": "umbreon"
+  },
+  {
+    "global_rank": 109,
+    "tier_rank": 24,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Lanturn",
+    "slug": "lanturn",
+    "source_id": "lanturn",
+    "canonical_id": "lanturn"
+  },
+  {
+    "global_rank": 110,
+    "tier_rank": 25,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Ariados",
+    "slug": "ariados",
+    "source_id": "ariados",
+    "canonical_id": "ariados"
+  },
+  {
+    "global_rank": 111,
+    "tier_rank": 26,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Dragonite",
+    "slug": "shadow-dragonite",
+    "source_id": "shadow-dragonite",
+    "canonical_id": "dragonite_shadow"
+  },
+  {
+    "global_rank": 112,
+    "tier_rank": 27,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Alolan Marowak",
+    "slug": "alolan-marowak",
+    "source_id": "alolan-marowak",
+    "canonical_id": "marowak_alolan"
+  },
+  {
+    "global_rank": 113,
+    "tier_rank": 28,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Alolan Marowak",
+    "slug": "shadow-alolan-marowak",
+    "source_id": "shadow-alolan-marowak",
+    "canonical_id": "alolan_marowak_shadow"
+  },
+  {
+    "global_rank": 114,
+    "tier_rank": 29,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Poliwrath",
+    "slug": "shadow-poliwrath",
+    "source_id": "shadow-poliwrath",
+    "canonical_id": "poliwrath_shadow"
+  },
+  {
+    "global_rank": 115,
+    "tier_rank": 30,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Machamp",
+    "slug": "machamp",
+    "source_id": "machamp",
+    "canonical_id": "machamp"
+  },
+  {
+    "global_rank": 116,
+    "tier_rank": 31,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Machamp",
+    "slug": "shadow-machamp",
+    "source_id": "shadow-machamp",
+    "canonical_id": "machamp_shadow"
+  },
+  {
+    "global_rank": 117,
+    "tier_rank": 32,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Clefable",
+    "slug": "clefable",
+    "source_id": "clefable",
+    "canonical_id": "clefable"
+  },
+  {
+    "global_rank": 118,
+    "tier_rank": 33,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Venusaur",
+    "slug": "venusaur",
+    "source_id": "venusaur",
+    "canonical_id": "venusaur"
+  },
+  {
+    "global_rank": 119,
+    "tier_rank": 34,
+    "tier": "B+ Tier",
+    "tier_weight": 0.72,
+    "name": "Shadow Venusaur",
+    "slug": "shadow-venusaur",
+    "source_id": "shadow-venusaur",
+    "canonical_id": "venusaur_shadow"
+  },
+  {
+    "global_rank": 120,
+    "tier_rank": 1,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Kingambit",
+    "slug": "kingambit",
+    "source_id": "kingambit",
+    "canonical_id": "kingambit"
+  },
+  {
+    "global_rank": 121,
+    "tier_rank": 2,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Bombirdier",
+    "slug": "bombirdier",
+    "source_id": "bombirdier",
+    "canonical_id": "bombirdier"
+  },
+  {
+    "global_rank": 122,
+    "tier_rank": 3,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Hakamo-o",
+    "slug": "hakamo-o",
+    "source_id": "hakamo-o",
+    "canonical_id": "hakamo_o"
+  },
+  {
+    "global_rank": 123,
+    "tier_rank": 4,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Cresselia",
+    "slug": "cresselia",
+    "source_id": "cresselia",
+    "canonical_id": "cresselia"
+  },
+  {
+    "global_rank": 124,
+    "tier_rank": 5,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Giratina (Origin Forme)",
+    "slug": "giratina-origin-forme",
+    "source_id": "giratina-origin-forme",
+    "canonical_id": "giratina_origin_forme"
+  },
+  {
+    "global_rank": 125,
+    "tier_rank": 6,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Galvantula",
+    "slug": "galvantula",
+    "source_id": "galvantula",
+    "canonical_id": "galvantula"
+  },
+  {
+    "global_rank": 126,
+    "tier_rank": 7,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Serperior",
+    "slug": "serperior",
+    "source_id": "serperior",
+    "canonical_id": "serperior"
+  },
+  {
+    "global_rank": 127,
+    "tier_rank": 8,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Shadow Hippowdon",
+    "slug": "shadow-hippowdon",
+    "source_id": "shadow-hippowdon",
+    "canonical_id": "hippowdon_shadow"
+  },
+  {
+    "global_rank": 128,
+    "tier_rank": 9,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Froslass",
+    "slug": "froslass",
+    "source_id": "froslass",
+    "canonical_id": "froslass"
+  },
+  {
+    "global_rank": 129,
+    "tier_rank": 10,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Drifblim",
+    "slug": "drifblim",
+    "source_id": "drifblim",
+    "canonical_id": "drifblim"
+  },
+  {
+    "global_rank": 130,
+    "tier_rank": 11,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Shadow Magnezone",
+    "slug": "shadow-magnezone",
+    "source_id": "shadow-magnezone",
+    "canonical_id": "magnezone_shadow"
+  },
+  {
+    "global_rank": 131,
+    "tier_rank": 12,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Bronzong",
+    "slug": "bronzong",
+    "source_id": "bronzong",
+    "canonical_id": "bronzong"
+  },
+  {
+    "global_rank": 132,
+    "tier_rank": 13,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Shadow Drifblim",
+    "slug": "shadow-drifblim",
+    "source_id": "shadow-drifblim",
+    "canonical_id": "drifblim_shadow"
+  },
+  {
+    "global_rank": 133,
+    "tier_rank": 14,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Regirock",
+    "slug": "regirock",
+    "source_id": "regirock",
+    "canonical_id": "regirock"
+  },
+  {
+    "global_rank": 134,
+    "tier_rank": 15,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Latios",
+    "slug": "latios",
+    "source_id": "latios",
+    "canonical_id": "latios"
+  },
+  {
+    "global_rank": 135,
+    "tier_rank": 16,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Shadow Latios",
+    "slug": "shadow-latios",
+    "source_id": "shadow-latios",
+    "canonical_id": "latios_shadow"
+  },
+  {
+    "global_rank": 136,
+    "tier_rank": 17,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Tropius",
+    "slug": "tropius",
+    "source_id": "tropius",
+    "canonical_id": "tropius"
+  },
+  {
+    "global_rank": 137,
+    "tier_rank": 18,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Medicham",
+    "slug": "medicham",
+    "source_id": "medicham",
+    "canonical_id": "medicham"
+  },
+  {
+    "global_rank": 138,
+    "tier_rank": 19,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Shadow Ursaring",
+    "slug": "shadow-ursaring",
+    "source_id": "shadow-ursaring",
+    "canonical_id": "ursaring_shadow"
+  },
+  {
+    "global_rank": 139,
+    "tier_rank": 20,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Qwilfish",
+    "slug": "qwilfish",
+    "source_id": "qwilfish",
+    "canonical_id": "qwilfish"
+  },
+  {
+    "global_rank": 140,
+    "tier_rank": 21,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Shadow Dragonair",
+    "slug": "shadow-dragonair",
+    "source_id": "shadow-dragonair",
+    "canonical_id": "dragonair_shadow"
+  },
+  {
+    "global_rank": 141,
+    "tier_rank": 22,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Togetic",
+    "slug": "togetic",
+    "source_id": "togetic",
+    "canonical_id": "togetic"
+  },
+  {
+    "global_rank": 142,
+    "tier_rank": 23,
+    "tier": "B Tier",
+    "tier_weight": 0.62,
+    "name": "Alolan Ninetales",
+    "slug": "alolan-ninetales",
+    "source_id": "alolan-ninetales",
+    "canonical_id": "ninetales_alolan"
+  },
+  {
+    "global_rank": 143,
+    "tier_rank": 1,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Shadow Trevenant",
+    "slug": "shadow-trevenant",
+    "source_id": "shadow-trevenant",
+    "canonical_id": "trevenant_shadow"
+  },
+  {
+    "global_rank": 144,
+    "tier_rank": 2,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Shadow Zweilous",
+    "slug": "shadow-zweilous",
+    "source_id": "shadow-zweilous",
+    "canonical_id": "zweilous_shadow"
+  },
+  {
+    "global_rank": 145,
+    "tier_rank": 3,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Shadow Palkia",
+    "slug": "shadow-palkia",
+    "source_id": "shadow-palkia",
+    "canonical_id": "palkia_shadow"
+  },
+  {
+    "global_rank": 146,
+    "tier_rank": 4,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Runerigus",
+    "slug": "runerigus",
+    "source_id": "runerigus",
+    "canonical_id": "runerigus"
+  },
+  {
+    "global_rank": 147,
+    "tier_rank": 5,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Melmetal",
+    "slug": "melmetal",
+    "source_id": "melmetal",
+    "canonical_id": "melmetal"
+  },
+  {
+    "global_rank": 148,
+    "tier_rank": 6,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Togedemaru",
+    "slug": "togedemaru",
+    "source_id": "togedemaru",
+    "canonical_id": "togedemaru"
+  },
+  {
+    "global_rank": 149,
+    "tier_rank": 7,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Dubwool",
+    "slug": "dubwool",
+    "source_id": "dubwool",
+    "canonical_id": "dubwool"
+  },
+  {
+    "global_rank": 150,
+    "tier_rank": 8,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Meowscarada",
+    "slug": "meowscarada",
+    "source_id": "meowscarada",
+    "canonical_id": "meowscarada"
+  },
+  {
+    "global_rank": 151,
+    "tier_rank": 9,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Lurantis",
+    "slug": "lurantis",
+    "source_id": "lurantis",
+    "canonical_id": "lurantis"
+  },
+  {
+    "global_rank": 152,
+    "tier_rank": 10,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Dondozo",
+    "slug": "dondozo",
+    "source_id": "dondozo",
+    "canonical_id": "dondozo"
+  },
+  {
+    "global_rank": 153,
+    "tier_rank": 11,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Urshifu - Single Strike Style",
+    "slug": "urshifu---single-strike-style",
+    "source_id": "urshifu---single-strike-style",
+    "canonical_id": "urshifu_single_strike_style"
+  },
+  {
+    "global_rank": 154,
+    "tier_rank": 12,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Urshifu - Rapid Strike Style",
+    "slug": "urshifu---rapid-strike-style",
+    "source_id": "urshifu---rapid-strike-style",
+    "canonical_id": "urshifu_rapid_strike_style"
+  },
+  {
+    "global_rank": 155,
+    "tier_rank": 13,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Talonflame",
+    "slug": "talonflame",
+    "source_id": "talonflame",
+    "canonical_id": "talonflame"
+  },
+  {
+    "global_rank": 156,
+    "tier_rank": 14,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Trevenant",
+    "slug": "trevenant",
+    "source_id": "trevenant",
+    "canonical_id": "trevenant"
+  },
+  {
+    "global_rank": 157,
+    "tier_rank": 15,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Galarian Stunfisk",
+    "slug": "galarian-stunfisk",
+    "source_id": "galarian-stunfisk",
+    "canonical_id": "stunfisk_galarian"
+  },
+  {
+    "global_rank": 158,
+    "tier_rank": 16,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Zweilous",
+    "slug": "zweilous",
+    "source_id": "zweilous",
+    "canonical_id": "zweilous"
+  },
+  {
+    "global_rank": 159,
+    "tier_rank": 17,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Cofagrigus",
+    "slug": "cofagrigus",
+    "source_id": "cofagrigus",
+    "canonical_id": "cofagrigus"
+  },
+  {
+    "global_rank": 160,
+    "tier_rank": 18,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Scrafty",
+    "slug": "scrafty",
+    "source_id": "scrafty",
+    "canonical_id": "scrafty"
+  },
+  {
+    "global_rank": 161,
+    "tier_rank": 19,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Hisuian Zoroark",
+    "slug": "hisuian-zoroark",
+    "source_id": "hisuian-zoroark",
+    "canonical_id": "zoroark_hisuian"
+  },
+  {
+    "global_rank": 162,
+    "tier_rank": 20,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Hisuian Lilligant",
+    "slug": "hisuian-lilligant",
+    "source_id": "hisuian-lilligant",
+    "canonical_id": "lilligant_hisuian"
+  },
+  {
+    "global_rank": 163,
+    "tier_rank": 21,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Gallade",
+    "slug": "gallade",
+    "source_id": "gallade",
+    "canonical_id": "gallade"
+  },
+  {
+    "global_rank": 164,
+    "tier_rank": 22,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Shadow Regirock",
+    "slug": "shadow-regirock",
+    "source_id": "shadow-regirock",
+    "canonical_id": "regirock_shadow"
+  },
+  {
+    "global_rank": 165,
+    "tier_rank": 23,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Pelipper",
+    "slug": "pelipper",
+    "source_id": "pelipper",
+    "canonical_id": "pelipper"
+  },
+  {
+    "global_rank": 166,
+    "tier_rank": 24,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Skarmory",
+    "slug": "skarmory",
+    "source_id": "skarmory",
+    "canonical_id": "skarmory"
+  },
+  {
+    "global_rank": 167,
+    "tier_rank": 25,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Meganium",
+    "slug": "meganium",
+    "source_id": "meganium",
+    "canonical_id": "meganium"
+  },
+  {
+    "global_rank": 168,
+    "tier_rank": 26,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Lickitung",
+    "slug": "lickitung",
+    "source_id": "lickitung",
+    "canonical_id": "lickitung"
+  },
+  {
+    "global_rank": 169,
+    "tier_rank": 27,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Shadow Victreebel",
+    "slug": "shadow-victreebel",
+    "source_id": "shadow-victreebel",
+    "canonical_id": "victreebel_shadow"
+  },
+  {
+    "global_rank": 170,
+    "tier_rank": 28,
+    "tier": "C Tier",
+    "tier_weight": 0.5,
+    "name": "Shadow Machoke",
+    "slug": "shadow-machoke",
+    "source_id": "shadow-machoke",
+    "canonical_id": "machoke_shadow"
+  }
+]

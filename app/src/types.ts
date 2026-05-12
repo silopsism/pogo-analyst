@@ -57,3 +57,76 @@ export type MergedData = {
   pvp_charged_moves: Record<string, MoveEntry>;
   type_effectiveness: Record<string, Record<string, number>>;
 };
+
+export type GreatLeagueCombinedRow = {
+  canonical_id: string;
+  local_lookup_species_id: string;
+  local_lookup_found: boolean;
+  name: string;
+  pvpoke: {
+    rank: number;
+    score: number;
+    rating: number | null;
+    species_id: string;
+    species_name: string;
+    moveset: string[];
+    moves: {
+      fast: Array<{
+        move_id: string;
+        uses: number;
+      }>;
+      charged: Array<{
+        move_id: string;
+        uses: number;
+      }>;
+    };
+    traits: string[];
+    weaknesses: string[];
+    resistances: string[];
+    requires_elite_for_recommended_moveset: boolean;
+    recommended_move_elite_flags: boolean[];
+    recommended_move_statuses: Array<"standard" | "elite" | "missing_on_species" | "missing_globally">;
+    has_unresolved_recommended_moveset: boolean;
+    recommended_move_unresolved_flags: boolean[];
+    scores: {
+      overall: number | null;
+      leads: number | null;
+      closers: number | null;
+      switches: number | null;
+      chargers: number | null;
+      attackers: number | null;
+      consistency: number | null;
+      attack: number | null;
+      defense: number | null;
+      stamina: number | null;
+    };
+  };
+};
+
+export type GreatLeagueCombinedData = {
+  meta: {
+    generated_at_utc: string;
+    league: string;
+    source: string;
+    counts: {
+      pvpoke_total: number;
+      requires_elite_total?: number;
+      unresolved_recommended_moveset_total?: number;
+    };
+  };
+  pvpoke_rankings: GreatLeagueCombinedRow[];
+};
+
+export type CurrentRaidBossEntry = {
+  boosted_weather?: string[];
+  form: string;
+  id: number;
+  name: string;
+  tier: number;
+  type?: string[];
+};
+
+export type CurrentRaidBossesData = {
+  current: Record<string, CurrentRaidBossEntry[]>;
+  previous?: unknown;
+};

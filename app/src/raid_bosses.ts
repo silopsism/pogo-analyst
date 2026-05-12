@@ -1,6 +1,7 @@
-import type { PokemonEntry } from "./types.ts";
+import type { CurrentRaidBossEntry, CurrentRaidBossesData, PokemonEntry } from "./types.ts";
+import type { PokemonSpecies } from "./rarity/types.ts";
 
-export type RaidBossSourceFilter = "Current Rotation" | "T5 past year" | "All possible T5";
+export type RaidBossSourceFilter = "Current Rotation" | "Mythical & Legendary" | "All other bosses";
 export type RaidBossBucket = "5 Star" | "3 Star" | "1 Star" | "Mega";
 export type RaidBossBucketFilter = RaidBossBucket | "All";
 
@@ -31,6 +32,20 @@ export type RaidBossOptionGroup = {
 
 function makeKey(speciesName: string, speciesForm: string): string {
   return `${speciesName}::${speciesForm}`;
+}
+
+function bucketFromTierKey(tierKey: string, tierValue: number | null | undefined): RaidBossBucket {
+  if (tierKey.startsWith("mega")) {
+    return "Mega";
+  }
+  const tier = tierValue ?? Number.parseInt(tierKey, 10);
+  if (Number.isFinite(tier) && tier >= 5) {
+    return "5 Star";
+  }
+  if (Number.isFinite(tier) && tier >= 3) {
+    return "3 Star";
+  }
+  return "1 Star";
 }
 
 const T5_PAST_YEAR_KEYS = new Set<string>([
@@ -303,11 +318,7 @@ const RAW_BOSSES: Omit<RaidBossCatalogEntry, "label">[] = [
 
 export const DEFAULT_RAID_BOSS_KEY = makeKey("Dragonite", "Normal");
 
-export const RAID_BOSS_SOURCE_OPTIONS: RaidBossSourceFilter[] = [
-  "Current Rotation",
-  "T5 past year",
-  "All possible T5",
-];
+export const RAID_BOSS_SOURCE_OPTIONS: RaidBossSourceFilter[] = ["Current Rotation", "Mythical & Legendary", "All other bosses"];
 
 export function formatRaidBossLabel(entry: RaidBossCatalogEntry): string {
   if (entry.speciesName.startsWith("Shadow ") || entry.speciesName.startsWith("Mega ")) {
@@ -348,6 +359,46 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
+function normalizeFormToken(value: string): string {
+  const token = normalize(value).replace(/[^a-z0-9]+/g, "");
+  if (!token) {
+    return "normal";
+  }
+  if (token === "alola" || token === "alolan") {
+    return "alolan";
+  }
+  if (token === "galar" || token === "galarian") {
+    return "galarian";
+  }
+  if (token === "hisui" || token === "hisuian") {
+    return "hisuian";
+  }
+  if (token === "paldea" || token === "paldean") {
+    return "paldean";
+  }
+  return token;
+}
+
+function displayFormFromApi(value: string): string {
+  const token = normalizeFormToken(value);
+  if (token === "normal") {
+    return "Normal";
+  }
+  if (token === "alolan") {
+    return "Alolan";
+  }
+  if (token === "galarian") {
+    return "Galarian";
+  }
+  if (token === "hisuian") {
+    return "Hisuian";
+  }
+  if (token === "paldean") {
+    return "Paldean";
+  }
+  return value || "Normal";
+}
+
 function preferredByName(name: string, pokemon: PokemonEntry[]): PokemonEntry | null {
   const matches = pokemon.filter((entry) => normalize(entry.name) === normalize(name));
   if (!matches.length) {
@@ -367,23 +418,79 @@ function cloneBossPokemon(base: PokemonEntry, entry: RaidBossCatalogEntry): Poke
   };
 }
 
-function draftRaidBossEntryFromPokemon(pokemon: PokemonEntry): RaidBossCatalogEntry {
+function draftRaidBossEntryFromPokemon(
+  pokemon: PokemonEntry,
+  bucket: RaidBossBucket = "5 Star",
+  currentRotation = false,
+): RaidBossCatalogEntry {
   const key = makeKey(pokemon.name, pokemon.form);
   return {
     key,
     label: formatRaidBossLabel({
       key,
-      bucket: "5 Star",
+      bucket,
       popular: false,
-      currentRotation: false,
+      currentRotation,
       speciesName: pokemon.name,
       speciesForm: pokemon.form,
     }),
-    bucket: "5 Star",
+    bucket,
     popular: false,
-    currentRotation: false,
+    currentRotation,
     speciesName: pokemon.name,
     speciesForm: pokemon.form,
+  };
+}
+
+function findPokemonByNameAndForm(
+  allPokemon: PokemonEntry[],
+  speciesName: string,
+  speciesForm: string,
+): PokemonEntry | null {
+  const targetName = normalize(speciesName);
+  const targetForm = normalizeFormToken(speciesForm);
+  const exact = allPokemon.find(
+    (pokemon) =>
+      normalize(pokemon.name) === targetName && normalizeFormToken(pokemon.form) === targetForm,
+  );
+  if (exact) {
+    return exact;
+  }
+  return allPokemon.find((pokemon) => normalize(pokemon.name) === targetName) ?? null;
+}
+
+function draftCurrentRaidEntry(
+  raidBoss: CurrentRaidBossEntry,
+  tierKey: string,
+  allPokemon: PokemonEntry[],
+): RaidBossCatalogEntry {
+  const bucket = bucketFromTierKey(tierKey, raidBoss.tier);
+  const isMega = bucket === "Mega";
+  const resolvedName = isMega ? `Mega ${raidBoss.name}` : raidBoss.name;
+  const resolvedForm = isMega ? "Mega" : displayFormFromApi(raidBoss.form || "Normal");
+  const foundPokemon = findPokemonByNameAndForm(allPokemon, raidBoss.name, raidBoss.form || "Normal");
+  const proxyTypes = raidBoss.type?.length ? raidBoss.type : foundPokemon?.types;
+  const key = makeKey(resolvedName, resolvedForm);
+  return {
+    key,
+    label: formatRaidBossLabel({
+      key,
+      bucket,
+      popular: false,
+      currentRotation: true,
+      speciesName: resolvedName,
+      speciesForm: resolvedForm,
+    }),
+    bucket,
+    popular: false,
+    currentRotation: true,
+    speciesName: resolvedName,
+    speciesForm: resolvedForm,
+    proxyBaseSpecies: isMega ? raidBoss.name : undefined,
+    proxyTypes,
+    proxyNote: isMega
+      ? `Mega ${raidBoss.name} uses a proxy profile based on ${raidBoss.name} until mega-form boss data is available locally.`
+      : undefined,
   };
 }
 
@@ -395,42 +502,134 @@ function isMegaBoss(entry: RaidBossCatalogEntry): boolean {
   return entry.bucket === "Mega" || entry.speciesName.startsWith("Mega ");
 }
 
+function currentRotationFromLiveData(
+  currentRaidBossesData: CurrentRaidBossesData | null | undefined,
+  allPokemon: PokemonEntry[],
+): RaidBossCatalogEntry[] {
+  const deduped = new Map<string, RaidBossCatalogEntry>();
+  const current = currentRaidBossesData?.current ?? null;
+  if (!current) {
+    return [];
+  }
+
+  Object.entries(current).forEach(([tierKey, entries]) => {
+    const safeEntries = Array.isArray(entries) ? entries : [];
+    safeEntries.forEach((raidBoss) => {
+      const isMegaTier = tierKey.startsWith("mega");
+      const apiName = raidBoss?.name ?? "";
+      const apiForm = raidBoss?.form ?? "Normal";
+      const exactKey = makeKey(apiName, displayFormFromApi(apiForm));
+      const catalogExact = RAID_BOSS_OPTIONS.find((entry) => entry.key === exactKey);
+      const catalogMega = isMegaTier
+        ? RAID_BOSS_OPTIONS.find((entry) => entry.key === makeKey(`Mega ${apiName}`, "Mega"))
+        : null;
+      const chosen = catalogMega ?? catalogExact ?? draftCurrentRaidEntry(raidBoss, tierKey, allPokemon);
+      deduped.set(chosen.key, chosen);
+    });
+  });
+
+  RAID_BOSS_OPTIONS.filter(
+    (entry) => CURRENT_ROTATION_KEYS.has(entry.key) && entry.speciesName.startsWith("Shadow "),
+  ).forEach((entry) => {
+    deduped.set(entry.key, entry);
+  });
+
+  return Array.from(deduped.values());
+}
+
 export function filterRaidBosses(
   source: RaidBossSourceFilter,
   allPokemon: PokemonEntry[] = [],
+  currentRaidBossesData: CurrentRaidBossesData | null = null,
+  pokemonSpeciesData: PokemonSpecies[] = [],
 ): RaidBossCatalogEntry[] {
   if (source === "Current Rotation") {
-    return RAID_BOSS_OPTIONS.filter((entry) => CURRENT_ROTATION_KEYS.has(entry.key));
+    const live = currentRotationFromLiveData(currentRaidBossesData, allPokemon);
+    if (live.length > 0) {
+      return live;
+    }
+    // Hardcoded full rotations go stale quickly. If live/local feeds are unavailable,
+    // keep only static shadow raid placeholders rather than outdated tier-5/mega picks.
+    return RAID_BOSS_OPTIONS.filter(
+      (entry) => CURRENT_ROTATION_KEYS.has(entry.key) && entry.speciesName.startsWith("Shadow "),
+    );
   }
 
-  if (source === "T5 past year") {
-    return RAID_BOSS_OPTIONS.filter((entry) => T5_PAST_YEAR_KEYS.has(entry.key));
-  }
-
-  const fromCatalog = RAID_BOSS_OPTIONS.filter((entry) => T5_PAST_YEAR_KEYS.has(entry.key));
-  const fromUltraBeasts = allPokemon
-    .filter((pokemon) => pokemon.released && isUltraBeastSpecies(pokemon.name))
-    .map((pokemon) => {
-      const key = makeKey(pokemon.name, pokemon.form);
-      return RAID_BOSS_OPTIONS.find((entry) => entry.key === key) ?? draftRaidBossEntryFromPokemon(pokemon);
+  const speciesFlagsByName = new Map<string, { isLegendary: boolean; isMythical: boolean; isUltraBeast: boolean }>();
+  pokemonSpeciesData.forEach((entry) => {
+    const key = normalize(entry.name);
+    const current = speciesFlagsByName.get(key) ?? { isLegendary: false, isMythical: false, isUltraBeast: false };
+    speciesFlagsByName.set(key, {
+      isLegendary: current.isLegendary || Boolean(entry.isLegendary),
+      isMythical: current.isMythical || Boolean(entry.isMythical),
+      isUltraBeast: current.isUltraBeast || Boolean(entry.isUltraBeast),
     });
-  const fromThreeStageFinals = allPokemon
-    .filter(
-      (pokemon) =>
-        pokemon.released &&
-        pokemon.evolution.is_final_evolution &&
-        (pokemon.evolution.line_names?.length ?? 0) >= 3,
-    )
-    .map((pokemon) => {
-      const key = makeKey(pokemon.name, pokemon.form);
-      return RAID_BOSS_OPTIONS.find((entry) => entry.key === key) ?? draftRaidBossEntryFromPokemon(pokemon);
-    });
-
-  const deduped = new Map<string, RaidBossCatalogEntry>();
-  [...fromCatalog, ...fromUltraBeasts, ...fromThreeStageFinals].forEach((entry) => {
-    deduped.set(entry.key, entry);
   });
-  return Array.from(deduped.values());
+
+  const isLegendaryMythicalOrUltra = (entry: RaidBossCatalogEntry): boolean => {
+    const baseName = normalize(
+      entry.speciesName
+        .replace(/^shadow\s+/i, "")
+        .replace(/^mega\s+/i, "")
+        .trim(),
+    );
+    const flags = speciesFlagsByName.get(baseName);
+    if (flags) {
+      return flags.isLegendary || flags.isMythical || flags.isUltraBeast;
+    }
+    return isUltraBeastSpecies(baseName);
+  };
+
+  const tierFiveFromRaidData = () => {
+    const deduped = new Map<string, RaidBossCatalogEntry>();
+    const sections: unknown[] = [];
+    if (currentRaidBossesData?.current) {
+      sections.push(currentRaidBossesData.current);
+    }
+    const previous = (currentRaidBossesData as { previous?: unknown } | null)?.previous;
+    if (previous && typeof previous === "object") {
+      sections.push(previous);
+    }
+
+    sections.forEach((section) => {
+      if (!section || typeof section !== "object") {
+        return;
+      }
+      Object.entries(section as Record<string, unknown>).forEach(([tierKey, rows]) => {
+        const safeRows = Array.isArray(rows) ? rows : [];
+        safeRows.forEach((raw) => {
+          const raidBoss = raw as CurrentRaidBossEntry;
+          if (!raidBoss || typeof raidBoss !== "object") {
+            return;
+          }
+          const tierValue = Number.isFinite(raidBoss.tier) ? raidBoss.tier : Number.parseInt(tierKey, 10);
+          if (!Number.isFinite(tierValue) || tierValue < 5 || tierKey.startsWith("mega")) {
+            return;
+          }
+          const drafted = draftCurrentRaidEntry(raidBoss, tierKey, allPokemon);
+          const entry: RaidBossCatalogEntry = {
+            ...drafted,
+            currentRotation: false,
+            bucket: "5 Star",
+          };
+          deduped.set(entry.key, entry);
+        });
+      });
+    });
+
+    if (deduped.size > 0) {
+      return Array.from(deduped.values());
+    }
+    return RAID_BOSS_OPTIONS.filter((entry) => entry.bucket === "5 Star");
+  };
+
+  const tierFive = tierFiveFromRaidData().filter((entry) => !isMegaBoss(entry));
+
+  if (source === "Mythical & Legendary") {
+    return tierFive.filter((entry) => isLegendaryMythicalOrUltra(entry));
+  }
+
+  return tierFive.filter((entry) => !isLegendaryMythicalOrUltra(entry));
 }
 
 export function groupRaidBosses(
@@ -438,48 +637,9 @@ export function groupRaidBosses(
   source: RaidBossSourceFilter,
   allPokemon: PokemonEntry[] = [],
 ): RaidBossOptionGroup[] {
-  if (source === "All possible T5") {
-    const threeStageFinalKeys = new Set(
-      allPokemon
-        .filter(
-          (pokemon) =>
-            pokemon.released &&
-            pokemon.evolution.is_final_evolution &&
-            (pokemon.evolution.line_names?.length ?? 0) >= 3,
-        )
-        .map((pokemon) => makeKey(pokemon.name, pokemon.form)),
-    );
-
-    const sortByLabel = (left: RaidBossCatalogEntry, right: RaidBossCatalogEntry) =>
-      left.label.localeCompare(right.label);
-    const megas = entries.filter((entry) => isMegaBoss(entry)).sort(sortByLabel);
-    const legendaryAndMythical = entries
-      .filter(
-        (entry) =>
-          !isMegaBoss(entry) &&
-          T5_PAST_YEAR_KEYS.has(entry.key) &&
-          !isUltraBeastSpecies(entry.speciesName),
-      )
-      .sort(sortByLabel);
-    const ultraBeasts = entries
-      .filter((entry) => isUltraBeastSpecies(entry.speciesName))
-      .sort(sortByLabel);
-    const threeStageFinals = entries
-      .filter(
-        (entry) =>
-          threeStageFinalKeys.has(entry.key) &&
-          !isMegaBoss(entry) &&
-          !T5_PAST_YEAR_KEYS.has(entry.key) &&
-          !isUltraBeastSpecies(entry.speciesName),
-      )
-      .sort(sortByLabel);
-
-    return [
-      { label: "Megas", options: megas },
-      { label: "Legendary & Mythical", options: legendaryAndMythical },
-      { label: "Ultra Beasts", options: ultraBeasts },
-      { label: "Other Final Evolutions", options: threeStageFinals },
-    ].filter((group) => group.options.length > 0);
+  if (source === "Mythical & Legendary" || source === "All other bosses") {
+    const sorted = [...entries].sort((left, right) => left.label.localeCompare(right.label));
+    return sorted.length ? [{ label: "5-Star", options: sorted }] : [];
   }
 
   const order: RaidBossBucket[] = ["Mega", "5 Star", "3 Star", "1 Star"];

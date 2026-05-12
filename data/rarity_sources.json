@@ -1,0 +1,49 @@
+{
+  "modelVersion": "v1-semantic",
+  "generatedAtUtc": "2026-05-10T19:08:21+00:00",
+  "disclaimer": "Estimated relative rarity only. Niantic does not publish official per-species wild spawn probabilities.",
+  "baselineMode": "non_event_static",
+  "sources": [
+    {
+      "id": "pokeminers_gm",
+      "description": "Primary species stats/types/move pools from PokeMiners Game Master.",
+      "paths": [
+        "data/raw/pokeminers/latest.json"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "pogoapi_supporting",
+      "description": "Supporting released roster and type-effectiveness tables.",
+      "paths": [
+        "data/raw/pogoapi/released_pokemon.json",
+        "data/raw/pogoapi/type_effectiveness.json"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "pokeapi_species",
+      "description": "Species flags (legendary/mythical/baby) and generation context.",
+      "paths": [
+        "data/raw/pokeapi/species/*.json"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "local_spawn_hints",
+      "description": "Legacy local hints for wild/raid/research/egg availability and rarity labels.",
+      "paths": [
+        "data/pokemon.csv"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "manual_overrides",
+      "description": "Project-owned manual corrections for regionals and exceptional cases.",
+      "paths": [
+        "data/manual_rarity_overrides.json"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "modelVersion": "v1",
+  "notes": "Manual move-pool corrections for recent events or lagging upstream sources.",
+  "overrides": [
+    {
+      "pokemonId": 916,
+      "pokemonName": "Oinkologne",
+      "forms": [
+        "Normal",
+        "Female"
+      ],
+      "moves": {
+        "elite_fast": [
+          "Mud Slap"
+        ]
+      },
+      "notes": "Lechonk Community Day on 2026-05-09 added Mud Slap for Oinkologne evolved during the event window; keep as elite/event fast move until upstream Game Master data catches up.",
+      "sources": [
+        "https://pokemongolive.com/post/communityday-may-2026-lechonk/"
+      ]
+    }
+  ]
+}

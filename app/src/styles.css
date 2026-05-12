@@ -254,6 +254,7 @@ select {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .mode-switch-tight {
@@ -382,6 +383,22 @@ select {
 .pokemon-title {
   font-size: 1.6rem;
   font-weight: 700;
+}
+
+.pokemon-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pokemon-rarity-inline {
+  margin-left: auto;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #f3f7ff;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .type-row {
@@ -730,11 +747,645 @@ select {
     minmax(120px, 0.8fr);
 }
 
+.pvp-meta-table-head,
+.pvp-meta-row {
+  grid-template-columns:
+    minmax(60px, 0.35fr)
+    minmax(300px, 2.05fr)
+    minmax(130px, 0.95fr)
+    minmax(90px, 0.6fr);
+}
+
+.pvp-meta-row {
+  width: 100%;
+  text-align: left;
+  background: rgba(18, 28, 42, 0.86);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+  transition: background-color 120ms ease, border-color 120ms ease;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.pvp-meta-row.active {
+  background: rgba(102, 184, 255, 0.24);
+  border-left-color: rgba(102, 184, 255, 0.72);
+}
+
+.pvp-meta-row.score-legend {
+  border-left-color: rgba(255, 255, 255, 0.42);
+}
+
+.pvp-meta-row.score-elite {
+  border-left-color: rgba(255, 255, 255, 0.4);
+}
+
+.pvp-meta-row.score-strong {
+  border-left-color: rgba(255, 255, 255, 0.36);
+}
+
+.pvp-meta-row.score-core {
+  border-left-color: rgba(255, 255, 255, 0.32);
+}
+
+.pvp-meta-row.score-fringe {
+  border-left-color: rgba(255, 255, 255, 0.28);
+}
+
+.pvp-name-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pvp-name-stack {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pvp-name-title {
+  line-height: 1.08;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+}
+
+.pvp-row-type-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.pvp-row-type-chip {
+  border-radius: 4px;
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 4px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pvp-fixed-type-chip {
+  min-width: 64px;
+  justify-content: center;
+  text-align: center;
+}
+
+.pvp-row-moveset {
+  font-size: 0.79rem;
+  line-height: 1.2;
+  font-weight: 800;
+  color: rgba(235, 245, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pvp-row-move-label {
+  color: var(--text);
+}
+
+.pvp-row-move-sep {
+  color: rgba(220, 232, 247, 0.8);
+}
+
+.pvp-score-cell {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  align-self: center;
+}
+
+.pvp-meta-table-head {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: rgba(7, 13, 22, 0.98);
+  backdrop-filter: blur(2px);
+}
+
+.pvp-detail-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pvp-local-card {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(6, 15, 28, 0.7);
+  border: 1px solid var(--line);
+}
+
+.pvp-local-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pvp-hero-chain-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.pvp-hero-chain-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pvp-hero-chain-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(8, 14, 24, 0.64);
+}
+
+.pvp-hero-chain-card.active {
+  border-color: rgba(102, 184, 255, 0.58);
+  background: rgba(102, 184, 255, 0.16);
+}
+
+.pvp-hero-chain-arrow {
+  color: rgba(195, 214, 236, 0.88);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.pvp-sidebar-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--muted);
+}
+
+.pvp-refresh-button {
+  width: 100%;
+  margin-bottom: 10px;
+  transition: background-image 140ms ease;
+}
+
+.pvp-refresh-button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.pvp-refresh-status {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.pvp-role-pill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  background: rgba(102, 184, 255, 0.1);
+  color: var(--text);
+}
+
+.pvp-movesets-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.pvp-moveset-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(8, 14, 24, 0.6);
+}
+
+.pvp-moveset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pvp-traits-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pvp-role-card {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(8, 14, 24, 0.62);
+}
+
+.pvp-role-card .pvp-traits-row {
+  margin-top: 6px;
+}
+
+.pvp-trait-pill {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(102, 184, 255, 0.14);
+  color: var(--text);
+  font-size: 0.84rem;
+  padding: 7px 12px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pvp-effectiveness-double {
+  font-weight: 800;
+}
+
+.team-builder-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.team-builder-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.team-slot-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(8, 14, 24, 0.68);
+  padding: 10px;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.team-slot-card.active {
+  border-color: rgba(102, 184, 255, 0.58);
+  background: rgba(8, 14, 24, 0.68);
+  box-shadow:
+    inset 0 0 0 1px rgba(102, 184, 255, 0.46),
+    0 0 0 1px rgba(102, 184, 255, 0.18);
+}
+
+.team-slot-card:focus-visible {
+  outline: 2px solid rgba(102, 184, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.team-slot-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.team-slot-title {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.team-slot-title-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.team-slot-type-icons {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 0;
+  vertical-align: middle;
+}
+
+.team-slot-clear {
+  flex: 0 0 auto;
+  min-width: 68px;
+  padding: 6px 8px;
+}
+
+.team-slot-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.team-save-button {
+  margin-inline: auto;
+  min-width: 140px;
+}
+
+.team-recommend-button {
+  width: 100%;
+  justify-content: center;
+}
+
+.pvp-recommendation-filter {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(102, 184, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(102, 184, 255, 0.08);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.saved-team-rename-button {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.saved-team-delete-button {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.saved-team-rename-button:disabled,
+.saved-team-delete-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.saved-team-list {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.saved-team-list > span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.saved-team-list-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(8, 14, 24, 0.65);
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.saved-team-list-item.active {
+  border-color: rgba(102, 184, 255, 0.55);
+  background: rgba(17, 28, 48, 0.95);
+}
+
+.team-save-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 6, 12, 0.72);
+  padding: 24px;
+}
+
+.team-save-modal {
+  width: min(460px, 100%);
+  padding: 16px;
+}
+
+.team-save-modal-close {
+  flex: 0 0 auto;
+  min-width: 96px;
+}
+
+.team-save-modal-submit {
+  width: 100%;
+}
+
+.team-slot-moves {
+  display: grid;
+  gap: 6px;
+}
+
+.team-slot-move-field {
+  margin-bottom: 0;
+}
+
+.team-slot-move-field > span {
+  font-size: 0.78rem;
+}
+
+.team-slot-move-field select {
+  padding: 8px 10px;
+  font-size: 0.84rem;
+}
+
+.team-analysis-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.team-type-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.team-chip-muted-1 {
+  filter: none;
+  opacity: 1;
+  border-color: rgba(150, 166, 190, 0.18);
+}
+
+.team-chip-muted-2 {
+  filter: none;
+  opacity: 1;
+  border-color: rgba(132, 148, 172, 0.14);
+}
+
+.team-chip-alert-1 {
+  filter: none;
+  opacity: 1;
+  border-color: rgba(245, 250, 255, 0.68);
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24), 0 0 10px rgba(255, 255, 255, 0.12);
+}
+
+.team-chip-caution-text {
+  filter: none;
+  opacity: 1;
+  border-color: rgba(150, 166, 190, 0.18);
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.team-chip-alert-2 {
+  filter: none;
+  opacity: 1;
+  font-weight: 900;
+  border-width: 3px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 0 12px rgba(255, 255, 255, 0.16);
+}
+
+.pvp-weakness-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pvp-weakness-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(8, 14, 24, 0.6);
+}
+
+.pvp-levelup-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pvp-levelup-card {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(10, 16, 28, 0.72);
+  text-align: center;
+}
+
+.pvp-levelup-main {
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.pvp-levelup-cp {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: rgba(197, 225, 254, 0.96);
+}
+
+.pvp-levelup-sub {
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.pvp-levelup-xl-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  border: 1px solid rgba(121, 217, 163, 0.45);
+  background: rgba(121, 217, 163, 0.16);
+  color: #d6ffe8;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.pvp-mode-shell {
+  height: calc(100vh - 130px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  overflow: hidden;
+}
+
+.pvp-summary-banner {
+  margin-bottom: 0;
+}
+
+.pvp-list-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.pokemon-icon-pvp-hero {
+  width: 84px;
+  height: 84px;
+}
+
+@media (max-width: 900px) {
+  .pvp-weakness-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pvp-levelup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pokemon-icon-pvp-hero {
+    width: 64px;
+    height: 64px;
+  }
+
+  .team-builder-slots {
+    grid-template-columns: 1fr;
+  }
+
+  .team-analysis-row {
+    grid-template-columns: 1fr;
+  }
+
+  .team-type-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .pvp-levelup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-table-head,
+.stats-table-row {
+  grid-template-columns:
+    minmax(320px, 1.65fr)
+    minmax(58px, 0.3fr)
+    minmax(58px, 0.3fr)
+    minmax(58px, 0.3fr)
+    minmax(92px, 0.48fr)
+    minmax(220px, 1.05fr)
+    minmax(92px, 0.56fr)
+    minmax(120px, 0.72fr)
+    minmax(104px, 0.62fr)
+    minmax(165px, 0.95fr);
+}
+
 .raid-table-row {
   background: transparent;
   border: 0;
   padding-block: 0;
   font-size: 0.86rem;
+  line-height: 1.05;
+}
+
+.stats-table-row {
+  background: transparent;
+  border: 0;
+  padding-block: 0;
+  font-size: 0.84rem;
   line-height: 1.05;
 }
 
@@ -808,6 +1459,20 @@ select {
 
 .raid-summary-footer {
   margin-top: 14px;
+}
+
+.generation-filter-list {
+  display: grid;
+  gap: 8px;
+}
+
+.generation-filter-item {
+  margin-bottom: 0;
+}
+
+.stats-type-icons {
+  gap: 4px;
+  overflow: auto;
 }
 
 .raid-note {

@@ -10,7 +10,12 @@ const projectRoot = path.resolve(rootDir, "..");
 const distDir = path.join(projectRoot, "dist");
 const dataDir = path.join(projectRoot, "data");
 const host = "127.0.0.1";
-const preferredPorts = [5173, 5174, 5175, 5176];
+const defaultPorts = [5173, 5174, 5175, 5176];
+const envPortRaw = process.env.PORT ?? process.env.DEV_PORT ?? "";
+const envPort = Number.parseInt(envPortRaw, 10);
+const preferredPorts = Number.isInteger(envPort) && envPort > 0
+  ? [envPort, ...defaultPorts.filter((port) => port !== envPort)]
+  : defaultPorts;
 
 async function fileExists(filePath) {
   try {
@@ -42,6 +47,40 @@ async function serveFile(res, filePath) {
     Expires: "0",
   });
   res.end(data);
+}
+
+function runPvpMetaRefresh() {
+  const windowsVenvPython = path.join(projectRoot, ".venv", "Scripts", "python.exe");
+  const fallbackPython = process.platform === "win32" ? "python" : "python3";
+  const pythonCmd = existsSync(windowsVenvPython) ? windowsVenvPython : fallbackPython;
+  const scriptPath = path.join(projectRoot, "scripts", "fetch_great_league_meta.py");
+
+  return new Promise((resolve, reject) => {
+    const child = spawn(pythonCmd, [scriptPath], {
+      cwd: projectRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on("error", (error) => reject(error));
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr });
+        return;
+      }
+      reject(new Error(`PvP meta refresh failed (exit ${String(code)}): ${stderr || stdout || "no output"}`));
+    });
+  });
 }
 
 function openBrowser(url) {
@@ -85,6 +124,40 @@ const server = createServer(async (req, res) => {
       Expires: "0",
     });
     res.end(payload);
+    return;
+  }
+
+  if (pathname === "/__refresh/pvp-meta") {
+    if (req.method !== "POST") {
+      res.writeHead(405, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      });
+      res.end(JSON.stringify({ ok: false, error: "Method not allowed" }));
+      return;
+    }
+
+    try {
+      await runPvpMetaRefresh();
+      res.writeHead(200, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      });
+      res.end(JSON.stringify({ ok: true, refreshed_at_utc: new Date().toISOString() }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to refresh PvP meta data";
+      res.writeHead(500, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      });
+      res.end(JSON.stringify({ ok: false, error: message }));
+    }
     return;
   }
 

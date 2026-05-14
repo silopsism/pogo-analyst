@@ -201,6 +201,30 @@ function formatTeamDps(value: number | null): string {
   return value === null ? "n/a" : value.toFixed(1);
 }
 
+function normalizeTypeFilterSelection(selected: string[], allTypesList: string[]): string[] {
+  const valid = selected.filter((type) => allTypesList.includes(type));
+  if (valid.length === 0 || valid.length === allTypesList.length) {
+    return allTypesList;
+  }
+  return valid;
+}
+
+function toggleTypeFilterSelection(current: string[], type: string, allTypesList: string[]): string[] {
+  const effectiveCurrent = normalizeTypeFilterSelection(current, allTypesList);
+  const isAllSelected = effectiveCurrent.length === allTypesList.length;
+  if (isAllSelected) {
+    return [type];
+  }
+
+  if (effectiveCurrent.includes(type)) {
+    const next = effectiveCurrent.filter((entry) => entry !== type);
+    return next.length === 0 ? [] : next;
+  }
+
+  const next = [...effectiveCurrent, type];
+  return next.length === allTypesList.length ? [] : next;
+}
+
 function cpAtLevel40(pokemon: PokemonEntry): number | null {
   const attack = pokemon.base_stats.attack;
   const defense = pokemon.base_stats.defense;
@@ -2027,6 +2051,7 @@ export default function App() {
   const [excludeLimitedPokemon, setExcludeLimitedPokemon] = useState(true);
   const [excludePvpEliteMovesetPokemon, setExcludePvpEliteMovesetPokemon] = useState(false);
   const [excludePvpXlRequiredPokemon, setExcludePvpXlRequiredPokemon] = useState(false);
+  const [pvpSelectedTypes, setPvpSelectedTypes] = useState<string[]>([]);
   const [weatherEnabled, setWeatherEnabled] = useState(true);
   const [targetType, setTargetType] = useState("Any");
   const [weather, setWeather] = useState<WeatherName>("None");
@@ -2239,6 +2264,10 @@ export default function App() {
     return counts;
   }, [visiblePokemon]);
   const availableTypes = useMemo(() => allTypes(visiblePokemon), [visiblePokemon]);
+  const effectivePvpSelectedTypes = useMemo(
+    () => normalizeTypeFilterSelection(pvpSelectedTypes, availableTypes),
+    [availableTypes, pvpSelectedTypes],
+  );
   const allGenerations = useMemo(() => [...new Set(POKEMON_REGIONS.map((entry) => entry.generation))], []);
   const pokemonBySpeciesId = useMemo(() => {
     const index = new Map<string, PokemonEntry>();
@@ -2298,6 +2327,13 @@ export default function App() {
         if (excludePvpXlRequiredPokemon && pokemon && requiresXlCandyForGreatLeague(pokemon)) {
           return null;
         }
+        if (effectivePvpSelectedTypes.length !== availableTypes.length) {
+          const typePool = pokemon?.types ?? row.types ?? [];
+          const hasSelectedType = typePool.some((type) => effectivePvpSelectedTypes.includes(type));
+          if (!hasSelectedType) {
+            return null;
+          }
+        }
         if (!query) {
           return { row, pokemon, relevance: Number.POSITIVE_INFINITY };
         }
@@ -2332,7 +2368,14 @@ export default function App() {
     filtered.sort((left, right) => (left.row.pvpoke.rank ?? 999999) - (right.row.pvpoke.rank ?? 999999));
 
     return filtered.map(({ row, pokemon }) => ({ row, pokemon }));
-  }, [excludePvpEliteMovesetPokemon, excludePvpXlRequiredPokemon, pvpRowsWithLocal, pvpSearch]);
+  }, [
+    availableTypes.length,
+    effectivePvpSelectedTypes,
+    excludePvpEliteMovesetPokemon,
+    excludePvpXlRequiredPokemon,
+    pvpRowsWithLocal,
+    pvpSearch,
+  ]);
   const pvpFilteredRows = useMemo(() => {
     if (!pvpRecommendationIds) {
       return pvpBaseFilteredRows;
@@ -3042,6 +3085,27 @@ export default function App() {
                   placeholder="Azumarill, clodsire, shadow..."
                 />
               </label>
+              <div className="field">
+                <span>Type filter</span>
+                <div className="type-filter">
+                  {availableTypes.map((type) => {
+                    const active = effectivePvpSelectedTypes.includes(type);
+                    return (
+                      <button
+                        key={`pvp-type-${type}`}
+                        type="button"
+                        className={active ? "type-pill active" : "type-pill type-pill-inactive"}
+                        style={typeStyle(type)}
+                        onClick={() =>
+                          setPvpSelectedTypes((current) => toggleTypeFilterSelection(current, type, availableTypes))
+                        }
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               {pvpRecommendationIds ? (
                 <div className="pvp-recommendation-filter">
                   <span>Recommendations active: {pvpFilteredRows.length} shown</span>

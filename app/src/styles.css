@@ -250,6 +250,10 @@ select {
   box-shadow: inset 0 0 0 1px rgba(121, 217, 163, 0.35);
 }
 
+.type-pill-inactive {
+  opacity: 0.3;
+}
+
 .mode-switch {
   display: flex;
   gap: 8px;

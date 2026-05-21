@@ -49,14 +49,14 @@ async function serveFile(res, filePath) {
   res.end(data);
 }
 
-function runPvpMetaRefresh() {
+function runPvpMetaRefresh(league = "great") {
   const windowsVenvPython = path.join(projectRoot, ".venv", "Scripts", "python.exe");
   const fallbackPython = process.platform === "win32" ? "python" : "python3";
   const pythonCmd = existsSync(windowsVenvPython) ? windowsVenvPython : fallbackPython;
   const scriptPath = path.join(projectRoot, "scripts", "fetch_great_league_meta.py");
 
   return new Promise((resolve, reject) => {
-    const child = spawn(pythonCmd, [scriptPath], {
+    const child = spawn(pythonCmd, [scriptPath, "--league", league], {
       cwd: projectRoot,
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -140,14 +140,30 @@ const server = createServer(async (req, res) => {
     }
 
     try {
-      await runPvpMetaRefresh();
+      let league = "great";
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      if (chunks.length) {
+        try {
+          const payload = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+          const incoming = String(payload?.league ?? "").toLowerCase();
+          if (incoming === "ultra" || incoming === "master" || incoming === "great") {
+            league = incoming;
+          }
+        } catch {
+          // fall back to default league
+        }
+      }
+      await runPvpMetaRefresh(league);
       res.writeHead(200, {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store, no-cache, must-revalidate",
         Pragma: "no-cache",
         Expires: "0",
       });
-      res.end(JSON.stringify({ ok: true, refreshed_at_utc: new Date().toISOString() }));
+      res.end(JSON.stringify({ ok: true, league, refreshed_at_utc: new Date().toISOString() }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to refresh PvP meta data";
       res.writeHead(500, {

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -12,7 +13,26 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 RAW_DIR = BASE_DIR / "data" / "raw" / "pvp_meta"
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
 
-PVPoke_RANKINGS_PAGE_URL = "https://pvpoke.com/rankings/all/1500/overall/"
+LEAGUE_CONFIG = {
+    "great": {
+        "label": "Great League",
+        "cp": 1500,
+        "page_url": "https://pvpoke.com/rankings/all/1500/overall/",
+        "output_file": "pvpoke_great_league_rankings.json",
+    },
+    "ultra": {
+        "label": "Ultra League",
+        "cp": 2500,
+        "page_url": "https://pvpoke.com/rankings/all/2500/overall/",
+        "output_file": "pvpoke_ultra_league_rankings.json",
+    },
+    "master": {
+        "label": "Master League",
+        "cp": 10000,
+        "page_url": "https://pvpoke.com/rankings/all/10000/overall/",
+        "output_file": "pvpoke_master_league_rankings.json",
+    },
+}
 
 REQUEST_HEADERS = {
     "User-Agent": "pokemon-go-explorer/1.0",
@@ -298,17 +318,21 @@ def derive_traits(scores: Dict[str, Optional[float]], stats: Dict[str, Optional[
     return deduped
 
 
-def build_pvpoke_output() -> Dict[str, Any]:
+def build_pvpoke_output(league: str) -> Dict[str, Any]:
     ensure_directories()
+    league_key = league if league in LEAGUE_CONFIG else "great"
+    config = LEAGUE_CONFIG[league_key]
+    page_url = config["page_url"]
+    cp = int(config["cp"])
 
-    pvpoke_page_html = fetch_text(PVPoke_RANKINGS_PAGE_URL)
-    save_text(RAW_DIR / "pvpoke_rankings_all_1500_overall.html", pvpoke_page_html)
+    pvpoke_page_html = fetch_text(page_url)
+    save_text(RAW_DIR / f"pvpoke_rankings_all_{cp}_overall.html", pvpoke_page_html)
     pvpoke_version = extract_site_version(pvpoke_page_html)
     pvpoke_json_url = (
-        f"https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v={pvpoke_version}"
+        f"https://pvpoke.com/data/rankings/all/overall/rankings-{cp}.json?v={pvpoke_version}"
     )
     pvpoke_rows = fetch_json(pvpoke_json_url)
-    save_json(RAW_DIR / "pvpoke_rankings_all_1500_overall.json", pvpoke_rows)
+    save_json(RAW_DIR / f"pvpoke_rankings_all_{cp}_overall.json", pvpoke_rows)
 
     merged_index, merged_move_pool_index = build_merged_indexes()
 
@@ -450,10 +474,10 @@ def build_pvpoke_output() -> Dict[str, Any]:
     return {
         "meta": {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "league": "Great League",
-            "source": PVPoke_RANKINGS_PAGE_URL,
+            "league": config["label"],
+            "source": page_url,
             "sources": {
-                "pvpoke_rankings_page": PVPoke_RANKINGS_PAGE_URL,
+                "pvpoke_rankings_page": page_url,
                 "pvpoke_rankings_json": pvpoke_json_url,
             },
             "counts": {
@@ -473,10 +497,21 @@ def build_pvpoke_output() -> Dict[str, Any]:
 
 
 def main() -> None:
-    payload = build_pvpoke_output()
-    output_path = PROCESSED_DIR / "pvpoke_great_league_rankings.json"
+    parser = argparse.ArgumentParser(description="Fetch PvPoke rankings and merge with local move/type metadata.")
+    parser.add_argument(
+        "--league",
+        choices=list(LEAGUE_CONFIG.keys()),
+        default="great",
+        help="League to fetch (great, ultra, master).",
+    )
+    args = parser.parse_args()
+    league = str(args.league or "great")
+    config = LEAGUE_CONFIG[league]
+
+    payload = build_pvpoke_output(league)
+    output_path = PROCESSED_DIR / str(config["output_file"])
     save_json(output_path, payload)
-    print(f"Saved PvPoke Great League data to {output_path}")
+    print(f"Saved PvPoke {config['label']} data to {output_path}")
 
     top_rows = payload.get("pvpoke_rankings", [])[:20]
     for row in top_rows:

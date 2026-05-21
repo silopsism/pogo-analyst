@@ -2,14 +2,15 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   allTypes,
   formatNumber,
-  loadGreatLeagueMetaData,
+  loadPvpMetaData,
   loadMergedData,
   loadCurrentRaidBossesData,
   loadPokemonSpeciesData,
-  refreshGreatLeagueMetaData,
+  refreshPvpMetaData,
   loadSpawnRarityData,
   normalizeQuery,
 } from "./data.ts";
+import type { PvpLeague } from "./data.ts";
 import {
   evolutionFamilyMembers,
   finalEvolutionOptions,
@@ -57,7 +58,7 @@ type ViewState = {
 };
 
 type Mode = "lookup" | "raid" | "stats" | "pvp" | "rarity";
-type PvpToolMode = "browser" | "builder";
+type TypeFilterMode = "or" | "and";
 
 const LIMITED_POKEMON = new Set(["eternatus", "zygarde", "cosmog", "poipole", "kubfu"]);
 
@@ -113,6 +114,11 @@ const TYPE_SYMBOLS: Record<string, string> = {
   Dark: "\uD83C\uDF11",
   Steel: "\u2699",
   Fairy: "\u2728",
+};
+const PVP_LEAGUE_CP_CAP: Record<PvpLeague, number> = {
+  great: 1500,
+  ultra: 2500,
+  master: 9999,
 };
 
 function contrastText(hex: string): string {
@@ -240,12 +246,15 @@ function cpAtLevel40(pokemon: PokemonEntry): number | null {
   return Math.max(10, cp);
 }
 
-function requiresXlCandyForGreatLeague(pokemon: PokemonEntry): boolean {
+function requiresXlCandyForLeague(pokemon: PokemonEntry, league: PvpLeague): boolean {
+  if (league === "master") {
+    return false;
+  }
   const level40Cp = cpAtLevel40(pokemon);
   if (level40Cp === null) {
     return false;
   }
-  return level40Cp < 1500;
+  return level40Cp < PVP_LEAGUE_CP_CAP[league];
 }
 
 function attackMultiplierAgainstPokemon(
@@ -347,6 +356,7 @@ type TeamSlotMoves = {
 type SavedTeam = {
   id: string;
   name: string;
+  league: PvpLeague;
   slots: Array<string | null>;
   slotMoves: TeamSlotMoves[];
   savedAt: string;
@@ -357,6 +367,34 @@ type TeamSaveDraft = {
   name: string;
   action: "save" | "rename";
 };
+
+function pvpCacheKey(league: PvpLeague): string {
+  return `pogo_pvp_meta_cache_${league}`;
+}
+
+function readCachedPvpMeta(league: PvpLeague): GreatLeagueCombinedData | null {
+  try {
+    const raw = localStorage.getItem(pvpCacheKey(league));
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw) as GreatLeagueCombinedData;
+    if (!parsed || !Array.isArray(parsed.pvpoke_rankings)) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedPvpMeta(league: PvpLeague, payload: GreatLeagueCombinedData): void {
+  try {
+    localStorage.setItem(pvpCacheKey(league), JSON.stringify(payload));
+  } catch {
+    // ignore cache write failures
+  }
+}
 
 function defenseScoreForType(
   attackType: string,
@@ -1552,11 +1590,13 @@ function PvpMetaTable({
   selectedId,
   onSelect,
   pokemonByCanonicalId,
+  league,
 }: {
   rows: GreatLeagueCombinedRow[];
   selectedId: string | null;
   onSelect: (row: GreatLeagueCombinedRow) => void;
   pokemonByCanonicalId: Map<string, PokemonEntry>;
+  league: PvpLeague;
 }) {
   return (
     <section className="panel ranking-panel raid-panel">
@@ -1596,7 +1636,10 @@ function PvpMetaTable({
               <span className="pvp-name-cell">
                 {pokemon ? <PokemonIcon pokemon={pokemon} className="pokemon-icon pokemon-icon-table" /> : null}
                 <span className="pvp-name-stack">
-                  <strong className="pvp-name-title">{row.name}</strong>
+                  <strong className="pvp-name-title">
+                    {row.name}
+                    {pokemon && requiresXlCandyForLeague(pokemon, league) ? <span className="pvp-levelup-xl-tag">XL</span> : null}
+                  </strong>
                   <span className="pvp-row-moveset">
                     {row.pvpoke.moveset.map((moveId, index) => {
                       const moveType = localMoveTypes.get(moveId) ?? null;
@@ -1645,12 +1688,14 @@ function PvpMetaDetail({
   typeEffectiveness,
   meaningfulFormCountByName,
   allPokemon,
+  league,
 }: {
   row: GreatLeagueCombinedRow | null;
   pokemon: PokemonEntry | null;
   typeEffectiveness: Record<string, Record<string, number>>;
   meaningfulFormCountByName: Map<string, number>;
   allPokemon: PokemonEntry[];
+  league: PvpLeague;
 }) {
   if (!row) {
     return (
@@ -1678,7 +1723,7 @@ function PvpMetaDetail({
                     <PokemonIcon pokemon={member} className="pokemon-icon pokemon-icon-pvp-hero" />
                     <div>
                       <strong>
-                        #{member.dex} {pokemonDisplayLabel(member, meaningfulFormCountByName)}
+                        {pokemonDisplayLabel(member, meaningfulFormCountByName)}
                       </strong>
                       <div className="type-row compact">
                         {member.types.map((type) => (
@@ -1700,27 +1745,29 @@ function PvpMetaDetail({
           <div className="raid-note">No matching local Pokemon form found for {row.local_lookup_species_id}.</div>
         )}
 
-        <div className="pvp-moveset-card">
-          <div className="lookup-label">Level Up</div>
-          <div className="pvp-levelup-grid">
-            {pokemon ? (
-              topGreatLeagueLevelUpCandidates(pokemon, 1500, 5).map((entry, index) => (
-                <div key={`${row.canonical_id}-lvl-${index}`} className="pvp-levelup-card">
-                  <span className="pvp-levelup-cp">CP {entry.cp}</span>
-                  <span className="pvp-levelup-main">
-                    IV {entry.iv_attack}/{entry.iv_defense}/{entry.iv_stamina}
-                  </span>
-                  <span className="pvp-levelup-sub">
-                    L{entry.level.toFixed(entry.level % 1 === 0 ? 0 : 1)} ({entry.dust_cost.toLocaleString()})
-                    {entry.level > 40 ? <span className="pvp-levelup-xl-tag">XL</span> : null}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <span className="raid-note">No level-up data available.</span>
-            )}
+        {league !== "master" ? (
+          <div className="pvp-moveset-card">
+            <div className="lookup-label">Level Up</div>
+            <div className="pvp-levelup-grid">
+              {pokemon ? (
+                topGreatLeagueLevelUpCandidates(pokemon, PVP_LEAGUE_CP_CAP[league], 5).map((entry, index) => (
+                  <div key={`${row.canonical_id}-lvl-${index}`} className="pvp-levelup-card">
+                    <span className="pvp-levelup-cp">CP {entry.cp}</span>
+                    <span className="pvp-levelup-main">
+                      IV {entry.iv_attack}/{entry.iv_defense}/{entry.iv_stamina}
+                    </span>
+                    <span className="pvp-levelup-sub">
+                      L{entry.level.toFixed(entry.level % 1 === 0 ? 0 : 1)} ({entry.dust_cost.toLocaleString()})
+                      {entry.level > 40 ? <span className="pvp-levelup-xl-tag">XL</span> : null}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <span className="raid-note">No level-up data available.</span>
+              )}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="pvp-role-card">
           <div className="lookup-label">Roles</div>
@@ -1833,16 +1880,27 @@ function TeamBuilderPanel({
           if (!entry) {
             if (teamEntries.length === 2) {
               return (
-                <div key={`slot-${index}`} className={isActive ? "team-slot-card active" : "team-slot-card"}>
+                <div
+                  key={`slot-${index}`}
+                  className={isActive ? "team-slot-card active" : "team-slot-card"}
+                  role="button"
+                  tabIndex={0}
+                  onClick={handleSlotCardClick}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleActiveSlot();
+                    }
+                  }}
+                >
                   <strong>Slot {index + 1}</strong>
                   <button
                     type="button"
-                    className="mode-pill active team-recommend-button"
+                    className="raid-note"
                     onClick={() => onMakeRecommendations(index)}
                   >
-                    Make recommendations
+                    Find PvP picks that cover this team's typing gaps.
                   </button>
-                  <span className="raid-note">Find PvP picks that cover this team's typing gaps.</span>
                 </div>
               );
             }
@@ -2033,6 +2091,14 @@ function TeamBuilderPanel({
 }
 
 export default function App() {
+  const [pvpLeague, setPvpLeague] = useState<PvpLeague>(() => {
+    try {
+      const stored = localStorage.getItem("pogo_pvp_selected_league");
+      return stored === "ultra" || stored === "master" ? stored : "great";
+    } catch {
+      return "great";
+    }
+  });
   const [state, setState] = useState<ViewState>({
     data: null,
     pvpMetaData: null,
@@ -2045,13 +2111,14 @@ export default function App() {
     raidBossesError: null,
     loading: true,
   });
-  const [mode, setMode] = useState<Mode>("raid");
+  const [mode, setMode] = useState<Mode>("stats");
   const [search, setSearch] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [excludeLimitedPokemon, setExcludeLimitedPokemon] = useState(true);
   const [excludePvpEliteMovesetPokemon, setExcludePvpEliteMovesetPokemon] = useState(false);
   const [excludePvpXlRequiredPokemon, setExcludePvpXlRequiredPokemon] = useState(false);
   const [pvpSelectedTypes, setPvpSelectedTypes] = useState<string[]>([]);
+  const [pvpTypeFilterMode, setPvpTypeFilterMode] = useState<TypeFilterMode>("or");
   const [weatherEnabled, setWeatherEnabled] = useState(true);
   const [targetType, setTargetType] = useState("Any");
   const [weather, setWeather] = useState<WeatherName>("None");
@@ -2079,7 +2146,7 @@ export default function App() {
   const [pvpSearch, setPvpSearch] = useState("");
   const [pvpRecommendationIds, setPvpRecommendationIds] = useState<string[] | null>(null);
   const [pvpSelectedId, setPvpSelectedId] = useState<string | null>(null);
-  const [pvpToolMode, setPvpToolMode] = useState<PvpToolMode>("browser");
+  const [pvpTeamBuilderEnabled, setPvpTeamBuilderEnabled] = useState(false);
   const [teamBuilderSlots, setTeamBuilderSlots] = useState<Array<string | null>>([null, null, null]);
   const [teamBuilderSlotMoves, setTeamBuilderSlotMoves] = useState<TeamSlotMoves[]>([
     { fast: null, charged1: null, charged2: null },
@@ -2107,12 +2174,6 @@ export default function App() {
     let active = true;
     Promise.all([
       loadMergedData(),
-      loadGreatLeagueMetaData().catch((error: unknown) => {
-        if (error instanceof Error) {
-          return { __error: error.message } as const;
-        }
-        return { __error: "Failed to load Great League meta data" } as const;
-      }),
       loadSpawnRarityData().catch((error: unknown) => {
         if (error instanceof Error) {
           return { __error: error.message } as const;
@@ -2132,7 +2193,7 @@ export default function App() {
         return { __error: "Failed to load current raid bosses data" } as const;
       }),
     ])
-      .then(([data, pvpMetaResult, spawnRarityResult, pokemonSpeciesResult, raidBossesResult]) => {
+      .then(([data, spawnRarityResult, pokemonSpeciesResult, raidBossesResult]) => {
         if (!active) {
           return;
         }
@@ -2147,55 +2208,116 @@ export default function App() {
           .filter(Boolean)
           .join(" | ");
 
-        if (pvpMetaResult && "__error" in pvpMetaResult) {
-          setState({
-            data,
-            pvpMetaData: null,
-            spawnRarityData,
-            pokemonSpeciesData,
-            raidBossesData,
-            error: null,
-            pvpMetaError: pvpMetaResult.__error,
-            rarityError: rarityError || null,
-            raidBossesError,
-            loading: false,
-          });
-          return;
-        }
-        setState({
+        setState((current) => ({
+          ...current,
           data,
-          pvpMetaData: pvpMetaResult,
           spawnRarityData,
           pokemonSpeciesData,
           raidBossesData,
           error: null,
-          pvpMetaError: null,
           rarityError: rarityError || null,
           raidBossesError,
           loading: false,
-        });
+        }));
       })
       .catch((error: unknown) => {
         if (!active) {
           return;
         }
-        setState({
+        setState((current) => ({
+          ...current,
           data: null,
-          pvpMetaData: null,
           spawnRarityData: [],
           pokemonSpeciesData: [],
           raidBossesData: null,
           error: error instanceof Error ? error.message : "Failed to load merged data",
-          pvpMetaError: null,
           rarityError: null,
           raidBossesError: null,
           loading: false,
-        });
+        }));
       });
     return () => {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("pogo_pvp_selected_league", pvpLeague);
+    } catch {
+      // ignore persistence failures
+    }
+  }, [pvpLeague]);
+
+  useEffect(() => {
+    setState((current) => {
+      if (current.pvpMetaData) {
+        return current;
+      }
+      const cached = readCachedPvpMeta(pvpLeague) ?? (pvpLeague !== "great" ? readCachedPvpMeta("great") : null);
+      if (!cached) {
+        return current;
+      }
+      return { ...current, pvpMetaData: cached };
+    });
+  }, [pvpLeague]);
+
+  useEffect(() => {
+    let active = true;
+    setState((current) => ({ ...current, pvpMetaError: null }));
+    const run = async () => {
+      try {
+        const data = await loadPvpMetaData(pvpLeague);
+        if (!active) {
+          return;
+        }
+        if (data) {
+          writeCachedPvpMeta(pvpLeague, data);
+          setState((current) => ({
+            ...current,
+            pvpMetaData: data,
+            pvpMetaError: null,
+          }));
+          return;
+        }
+        if (pvpLeague !== "great") {
+          const fallback = await loadPvpMetaData("great");
+          if (!active) {
+            return;
+          }
+          if (fallback) {
+            writeCachedPvpMeta("great", fallback);
+            setPvpLeague("great");
+            setState((current) => ({
+              ...current,
+              pvpMetaData: fallback,
+              pvpMetaError: `No ${pvpLeague} league file found. Switched to Great League.`,
+            }));
+            return;
+          }
+        }
+        setState((current) => ({
+          ...current,
+          pvpMetaData: null,
+          pvpMetaError: `No ${pvpLeague} league PvP data file found yet.`,
+        }));
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+        const message = error instanceof Error ? error.message : `Failed to load ${pvpLeague} league PvP data`;
+        setState((current) => ({
+          ...current,
+          pvpMetaData: null,
+          pvpMetaError: message,
+        }));
+      }
+    };
+    void run();
+    return () => {
+      active = false;
+    };
+  }, [pvpLeague]);
 
   const handlePvpRefresh = async () => {
     let progressTimer: ReturnType<typeof setInterval> | null = null;
@@ -2211,15 +2333,15 @@ export default function App() {
       });
     }, 180);
     try {
-      await refreshGreatLeagueMetaData();
-      const refreshed = await loadGreatLeagueMetaData();
+      await refreshPvpMetaData(pvpLeague);
+      const refreshed = await loadPvpMetaData(pvpLeague);
       setPvpRefreshProgress(100);
       setState((current) => ({
         ...current,
         pvpMetaData: refreshed,
-        pvpMetaError: null,
+        pvpMetaError: refreshed ? null : `No ${pvpLeague} league PvP data file found yet.`,
       }));
-      setPvpRefreshStatus("PvPoke data refreshed.");
+      setPvpRefreshStatus(`${pvpLeague[0].toUpperCase()}${pvpLeague.slice(1)} League PvP data refreshed.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to refresh PvPoke data";
       setPvpRefreshProgress(100);
@@ -2324,13 +2446,16 @@ export default function App() {
         if (excludePvpEliteMovesetPokemon && requiresElite) {
           return null;
         }
-        if (excludePvpXlRequiredPokemon && pokemon && requiresXlCandyForGreatLeague(pokemon)) {
+        if (excludePvpXlRequiredPokemon && pokemon && requiresXlCandyForLeague(pokemon, pvpLeague)) {
           return null;
         }
         if (effectivePvpSelectedTypes.length !== availableTypes.length) {
           const typePool = pokemon?.types ?? row.types ?? [];
-          const hasSelectedType = typePool.some((type) => effectivePvpSelectedTypes.includes(type));
-          if (!hasSelectedType) {
+          const matchesSelectedTypes =
+            pvpTypeFilterMode === "and"
+              ? effectivePvpSelectedTypes.every((type) => typePool.includes(type))
+              : typePool.some((type) => effectivePvpSelectedTypes.includes(type));
+          if (!matchesSelectedTypes) {
             return null;
           }
         }
@@ -2375,6 +2500,7 @@ export default function App() {
     excludePvpXlRequiredPokemon,
     pvpRowsWithLocal,
     pvpSearch,
+    pvpTypeFilterMode,
   ]);
   const pvpFilteredRows = useMemo(() => {
     if (!pvpRecommendationIds) {
@@ -2432,9 +2558,29 @@ export default function App() {
       if (!raw) {
         return;
       }
-      const parsed = JSON.parse(raw) as SavedTeam[];
+      const parsed = JSON.parse(raw) as Array<Partial<SavedTeam>>;
       if (Array.isArray(parsed)) {
-        setSavedTeams(parsed);
+        const normalized = parsed
+          .filter((entry) => entry && typeof entry.id === "string" && typeof entry.name === "string")
+          .map((entry) => ({
+            id: entry.id as string,
+            name: entry.name as string,
+            league: (entry.league === "ultra" || entry.league === "master" ? entry.league : "great") as PvpLeague,
+            slots: Array.isArray(entry.slots) ? entry.slots.map((slot) => slot ?? null) : [null, null, null],
+            slotMoves: Array.isArray(entry.slotMoves)
+              ? entry.slotMoves.map((row) => ({
+                  fast: row?.fast ?? null,
+                  charged1: row?.charged1 ?? null,
+                  charged2: row?.charged2 ?? null,
+                }))
+              : [
+                  { fast: null, charged1: null, charged2: null },
+                  { fast: null, charged1: null, charged2: null },
+                  { fast: null, charged1: null, charged2: null },
+                ],
+            savedAt: typeof entry.savedAt === "string" ? entry.savedAt : new Date().toISOString(),
+          }));
+        setSavedTeams(normalized);
       }
     } catch {
       // ignore bad local storage payload
@@ -2449,6 +2595,10 @@ export default function App() {
       // ignore persistence failures
     }
   };
+  const leagueSavedTeams = useMemo(
+    () => savedTeams.filter((team) => (team.league ?? "great") === pvpLeague),
+    [pvpLeague, savedTeams],
+  );
 
   const fallbackTeamName = () => {
     const names = teamBuilderResolvedSlots
@@ -2466,11 +2616,12 @@ export default function App() {
     const teamName = requestedName?.trim() || savedTeamNameDraft.trim() || fallbackTeamName();
     const normalizedTeamName = normalizeQuery(teamName);
     const existingTeam =
-      savedTeams.find((team) => team.id === selectedSavedTeamId) ??
-      savedTeams.find((team) => normalizeQuery(team.name) === normalizedTeamName);
+      leagueSavedTeams.find((team) => team.id === selectedSavedTeamId) ??
+      leagueSavedTeams.find((team) => normalizeQuery(team.name) === normalizedTeamName);
     const nextTeam: SavedTeam = {
       id: existingTeam?.id ?? `team-${stamp}`,
       name: teamName,
+      league: pvpLeague,
       slots: [...teamBuilderSlots],
       slotMoves: teamBuilderSlotMoves.map((row) => ({ ...row })),
       savedAt: stamp,
@@ -2481,7 +2632,7 @@ export default function App() {
     persistSavedTeams(next);
     setSelectedSavedTeamId(nextTeam.id);
     setSavedTeamNameDraft(teamName);
-    setSavedTeamFeedback(`${existingTeam ? "Updated" : "Saved"} "${teamName}".`);
+    setSavedTeamFeedback(`${existingTeam ? "Updated" : "Saved"} "${teamName}" (${pvpLeague.toUpperCase()}).`);
     setTeamSaveDraft({ open: false, name: "", action: "save" });
   };
 
@@ -2500,7 +2651,7 @@ export default function App() {
     }
     setSelectedSavedTeamId(team.id);
     setSavedTeamNameDraft(team.name);
-    setSavedTeamFeedback(`Loaded "${team.name}".`);
+    setSavedTeamFeedback(`Loaded "${team.name}" (${team.league.toUpperCase()}).`);
     setTeamBuilderSlots(team.slots.map((slot) => slot ?? null));
     setTeamBuilderSlotMoves(
       (team.slotMoves?.length ? team.slotMoves : [
@@ -2557,6 +2708,15 @@ export default function App() {
     setSavedTeamNameDraft("");
     setSavedTeamFeedback(deletedTeam ? `Deleted "${deletedTeam.name}".` : "Deleted saved team.");
   };
+  useEffect(() => {
+    if (!selectedSavedTeamId) {
+      return;
+    }
+    if (!leagueSavedTeams.some((team) => team.id === selectedSavedTeamId)) {
+      setSelectedSavedTeamId("");
+      setSavedTeamNameDraft("");
+    }
+  }, [leagueSavedTeams, selectedSavedTeamId]);
   const targetTypes = targetType === "Any" ? [] : [targetType];
   const activeWeather = weatherEnabled ? weather : "None";
   const speciesById = useMemo(() => {
@@ -2975,46 +3135,55 @@ export default function App() {
             <span>
               {mode === "raid"
                 ? `${raidAttackers.length} results`
-                : mode === "stats"
-                  ? `${statsRows.length} results`
-                  : mode === "pvp"
-                    ? `${pvpFilteredRows.length} results`
-                    : mode === "rarity"
-                      ? `${rarityFilteredRows.length} results`
-                      : `${lookupFilteredPokemon.length} results`}
+                : mode === "pvp"
+                  ? `${pvpFilteredRows.length} results`
+                  : `${statsRows.length} results`}
             </span>
           </div>
 
           <div className="mode-switch">
             <button
               type="button"
-              className={mode === "raid" ? "mode-pill active" : "mode-pill"}
-              onClick={() => setMode("raid")}
-            >
-              Raid Attackers
-            </button>
-            <button
-              type="button"
-              className={mode === "lookup" ? "mode-pill active" : "mode-pill"}
-              onClick={() => setMode("lookup")}
-            >
-              Lookup
-            </button>
-            <button
-              type="button"
               className={mode === "stats" ? "mode-pill active" : "mode-pill"}
               onClick={() => setMode("stats")}
             >
-              Stats
+              Pokemon
+            </button>
+            <button
+              type="button"
+              className={mode === "raid" ? "mode-pill active" : "mode-pill"}
+              onClick={() => setMode("raid")}
+            >
+              Raiding
             </button>
             <button
               type="button"
               className={mode === "pvp" ? "mode-pill active" : "mode-pill"}
               onClick={() => setMode("pvp")}
             >
-              PvP Meta
+              PvP
             </button>
           </div>
+          {mode === "pvp" ? (
+            <>
+              <label className="field">
+                <span>League</span>
+                <select value={pvpLeague} onChange={(event) => setPvpLeague(event.target.value as PvpLeague)}>
+                  <option value="great">Great League (CP 1500)</option>
+                  <option value="ultra">Ultra League (CP 2500)</option>
+                  <option value="master">Master League</option>
+                </select>
+              </label>
+              <label className="toggle-field">
+                <input
+                  type="checkbox"
+                  checked={pvpTeamBuilderEnabled}
+                  onChange={(event) => setPvpTeamBuilderEnabled(event.target.checked)}
+                />
+                <span>Enable Team Builder tools</span>
+              </label>
+            </>
+          ) : null}
 
           {mode === "raid" ? (
             <div className="field raid-include-field">
@@ -3085,27 +3254,6 @@ export default function App() {
                   placeholder="Azumarill, clodsire, shadow..."
                 />
               </label>
-              <div className="field">
-                <span>Type filter</span>
-                <div className="type-filter">
-                  {availableTypes.map((type) => {
-                    const active = effectivePvpSelectedTypes.includes(type);
-                    return (
-                      <button
-                        key={`pvp-type-${type}`}
-                        type="button"
-                        className={active ? "type-pill active" : "type-pill type-pill-inactive"}
-                        style={typeStyle(type)}
-                        onClick={() =>
-                          setPvpSelectedTypes((current) => toggleTypeFilterSelection(current, type, availableTypes))
-                        }
-                      >
-                        {type}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
               {pvpRecommendationIds ? (
                 <div className="pvp-recommendation-filter">
                   <span>Recommendations active: {pvpFilteredRows.length} shown</span>
@@ -3125,32 +3273,6 @@ export default function App() {
               />
             </label>
           )}
-
-          {mode === "lookup" ? (
-            <div className="field">
-              <span>Type filter</span>
-              <div className="type-filter">
-                {availableTypes.map((type) => {
-                  const active = selectedTypes.includes(type);
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      className={active ? "type-pill active" : "type-pill"}
-                      style={typeStyle(type)}
-                      onClick={() =>
-                        setSelectedTypes((current) =>
-                          current.includes(type) ? current.filter((entry) => entry !== type) : [...current, type],
-                        )
-                      }
-                    >
-                      {type}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
 
           <label className="toggle-field">
             <input
@@ -3301,21 +3423,40 @@ export default function App() {
             </>
             ) : mode === "pvp" ? (
             <>
-              <div className="mode-switch mode-switch-tight">
-                <button
-                  type="button"
-                  className={pvpToolMode === "browser" ? "mode-pill active" : "mode-pill"}
-                  onClick={() => setPvpToolMode("browser")}
-                >
-                  Meta Browser
-                </button>
-                <button
-                  type="button"
-                  className={pvpToolMode === "builder" ? "mode-pill active" : "mode-pill"}
-                  onClick={() => setPvpToolMode("builder")}
-                >
-                  Team Builder
-                </button>
+              <div className="ranking-summary raid-summary">
+                <span><strong>Active league:</strong> {pvpLeague[0].toUpperCase()}{pvpLeague.slice(1)} League</span>
+                <span><strong>CP cap:</strong> {pvpLeague === "master" ? "No cap" : PVP_LEAGUE_CP_CAP[pvpLeague]}</span>
+              </div>
+              <div className="field">
+                <div className="field-header-row type-filter-header-row">
+                  <span>Type filter</span>
+                  <button
+                    type="button"
+                    className="type-filter-mode-button"
+                    onClick={() => setPvpTypeFilterMode((current) => (current === "or" ? "and" : "or"))}
+                    aria-label={`Type filter mode: ${pvpTypeFilterMode.toUpperCase()}`}
+                  >
+                    {pvpTypeFilterMode.toUpperCase()}
+                  </button>
+                </div>
+                <div className="type-filter">
+                  {availableTypes.map((type) => {
+                    const active = effectivePvpSelectedTypes.includes(type);
+                    return (
+                      <button
+                        key={`pvp-type-${type}`}
+                        type="button"
+                        className={active ? "type-pill active" : "type-pill type-pill-inactive"}
+                        style={typeStyle(type)}
+                        onClick={() =>
+                          setPvpSelectedTypes((current) => toggleTypeFilterSelection(current, type, availableTypes))
+                        }
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <button
                 type="button"
@@ -3332,7 +3473,7 @@ export default function App() {
                 {pvpRefreshLoading ? "Refreshing PvPoke..." : "Refresh PvPoke Data"}
               </button>
               {pvpRefreshStatus ? <div className="pvp-refresh-status">{pvpRefreshStatus}</div> : null}
-              {pvpToolMode === "builder" ? (
+              {pvpTeamBuilderEnabled ? (
                 <>
                   <label className="field">
                     <span>Load saved team</span>
@@ -3352,7 +3493,7 @@ export default function App() {
                       }}
                     >
                       <option value="">Choose saved team...</option>
-                      {savedTeams.map((team) => (
+                      {leagueSavedTeams.map((team) => (
                         <option key={team.id} value={team.id}>
                           {team.name}
                         </option>
@@ -3376,21 +3517,6 @@ export default function App() {
                     Delete Saved Team
                   </button>
                   {savedTeamFeedback ? <div className="pvp-refresh-status">{savedTeamFeedback}</div> : null}
-                  {savedTeams.length ? (
-                    <div className="saved-team-list">
-                      <span>Saved teams</span>
-                      {savedTeams.map((team) => (
-                        <button
-                          key={`saved-team-list-${team.id}`}
-                          type="button"
-                          className={team.id === selectedSavedTeamId ? "saved-team-list-item active" : "saved-team-list-item"}
-                          onClick={() => loadSavedTeam(team.id)}
-                        >
-                          {team.name}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
                 </>
               ) : null}
               {state.pvpMetaError ? <div className="raid-note">{state.pvpMetaError}</div> : null}
@@ -3927,7 +4053,7 @@ export default function App() {
           ) : mode === "pvp" ? (
             <>
               <div className="pvp-mode-shell">
-                {pvpToolMode === "builder" ? (
+                {pvpTeamBuilderEnabled ? (
                   <TeamBuilderPanel
                     slots={teamBuilderResolvedSlots}
                     slotMoves={teamBuilderSlotMoves}
@@ -3959,21 +4085,29 @@ export default function App() {
                     typeEffectiveness={typeEffectiveness}
                     meaningfulFormCountByName={meaningfulFormCountByName}
                     allPokemon={visiblePokemon}
+                    league={pvpLeague}
                   />
                 )}
 
                 <div className="pvp-list-scroll">
+                  {!pvpFilteredRows.length ? (
+                    <section className="panel raid-banner">
+                      <div className="raid-note">
+                        {state.pvpMetaError ? state.pvpMetaError : "Loading PvP rankings..."}
+                      </div>
+                    </section>
+                  ) : null}
                   <PvpMetaTable
                     rows={pvpFilteredRows.map((entry) => entry.row)}
                     selectedId={
-                      pvpToolMode === "builder"
+                      pvpTeamBuilderEnabled
                         ? teamBuilderActiveSlot === null
                           ? null
                           : teamBuilderSlots[teamBuilderActiveSlot] ?? null
                         : selectedPvpRow?.row.canonical_id ?? null
                     }
                     onSelect={(row) => {
-                      if (pvpToolMode === "builder") {
+                      if (pvpTeamBuilderEnabled) {
                         const targetSlot =
                           teamBuilderActiveSlot ??
                           teamBuilderSlots.findIndex((slot) => !slot);
@@ -4003,6 +4137,7 @@ export default function App() {
                       setPvpSelectedId(row.canonical_id);
                     }}
                     pokemonByCanonicalId={pvpPokemonByCanonicalId}
+                    league={pvpLeague}
                   />
                 </div>
               </div>
@@ -4087,7 +4222,7 @@ export default function App() {
               </p>
             ) : mode === "pvp" ? (
               <p>
-                PvP mode uses PvPoke Great League Overall rankings and scores directly. Elite TM flags are inferred by
+                PvP mode uses PvPoke {pvpLeague[0].toUpperCase()}{pvpLeague.slice(1)} League rankings and scores directly. Elite TM flags are inferred by
                 comparing the recommended PvPoke moveset against local normal-vs-elite move pools. Unresolved markers
                 flag recommended moves that are missing from local species assignments or local move dictionaries.
               </p>

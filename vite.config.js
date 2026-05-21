@@ -4,14 +4,14 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 
-function runPvpMetaRefresh(projectRoot) {
+function runPvpMetaRefresh(projectRoot, league = "great") {
   const windowsVenvPython = path.join(projectRoot, ".venv", "Scripts", "python.exe");
   const fallbackPython = process.platform === "win32" ? "python" : "python3";
   const pythonCmd = existsSync(windowsVenvPython) ? windowsVenvPython : fallbackPython;
   const scriptPath = path.join(projectRoot, "scripts", "fetch_great_league_meta.py");
 
   return new Promise((resolve, reject) => {
-    const child = spawn(pythonCmd, [scriptPath], {
+    const child = spawn(pythonCmd, [scriptPath, "--league", league], {
       cwd: projectRoot,
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -51,10 +51,26 @@ function pvpMetaRefreshPlugin() {
           return;
         }
         try {
-          await runPvpMetaRefresh(server.config.root);
+          let league = "great";
+          const chunks = [];
+          for await (const chunk of req) {
+            chunks.push(chunk);
+          }
+          if (chunks.length) {
+            try {
+              const payload = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+              const incoming = String(payload?.league ?? "").toLowerCase();
+              if (incoming === "ultra" || incoming === "master" || incoming === "great") {
+                league = incoming;
+              }
+            } catch {
+              // keep default
+            }
+          }
+          await runPvpMetaRefresh(server.config.root, league);
           res.statusCode = 200;
           res.setHeader("Content-Type", "application/json; charset=utf-8");
-          res.end(JSON.stringify({ ok: true, refreshed_at_utc: new Date().toISOString() }));
+          res.end(JSON.stringify({ ok: true, league, refreshed_at_utc: new Date().toISOString() }));
         } catch (error) {
           const message = error instanceof Error ? error.message : "Failed to refresh PvP meta data";
           res.statusCode = 500;

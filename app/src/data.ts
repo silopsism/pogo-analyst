@@ -2,20 +2,30 @@ import type { CurrentRaidBossesData, GreatLeagueCombinedData, MergedData, MoveEn
 import type { PokemonSpecies, SpawnRarity } from "./rarity/types.ts";
 
 const DATA_URL = "/data/processed/merged_pogo_data.json";
-const GREAT_LEAGUE_META_URL = "/data/processed/pvpoke_great_league_rankings.json";
+const PVP_META_URL_BY_LEAGUE = {
+  great: "/data/processed/pvpoke_great_league_rankings.json",
+  ultra: "/data/processed/pvpoke_ultra_league_rankings.json",
+  master: "/data/processed/pvpoke_master_league_rankings.json",
+} as const;
 const SPAWN_RARITY_URL = "/data/spawn_rarity.json";
 const POKEMON_SPECIES_URL = "/data/pokemon_species.json";
 const LEEKDUCK_RAID_BOSSES_URL = "https://leekduck.com/raid-bosses/";
 const POGOAPI_RAID_BOSSES_URL = "https://pogoapi.net/api/v1/raid_bosses.json";
 const LOCAL_RAID_BOSSES_URL = "/data/raw/pogoapi/raid_bosses.json";
 
-export async function refreshGreatLeagueMetaData(): Promise<void> {
+export type PvpLeague = "great" | "ultra" | "master";
+
+export async function refreshPvpMetaData(league: PvpLeague): Promise<void> {
   const response = await fetch("/__refresh/pvp-meta", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ league }),
     cache: "no-store",
   });
   if (!response.ok) {
-    let message = `Failed to refresh Great League meta data: ${response.status} ${response.statusText}`;
+    let message = `Failed to refresh ${league} league meta data: ${response.status} ${response.statusText}`;
     try {
       const payload = (await response.json()) as { error?: string };
       if (payload?.error) {
@@ -36,13 +46,13 @@ export async function loadMergedData(): Promise<MergedData> {
   return (await response.json()) as MergedData;
 }
 
-export async function loadGreatLeagueMetaData(): Promise<GreatLeagueCombinedData | null> {
-  const response = await fetch(GREAT_LEAGUE_META_URL, { cache: "no-store" });
+export async function loadPvpMetaData(league: PvpLeague): Promise<GreatLeagueCombinedData | null> {
+  const response = await fetch(PVP_META_URL_BY_LEAGUE[league], { cache: "no-store" });
   if (response.status === 404) {
     return null;
   }
   if (!response.ok) {
-    throw new Error(`Failed to load Great League meta data: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to load ${league} league meta data: ${response.status} ${response.statusText}`);
   }
   return (await response.json()) as GreatLeagueCombinedData;
 }

@@ -842,6 +842,10 @@ select {
   letter-spacing: 0.01em;
 }
 
+.pvp-shadow-prefix {
+  color: rgba(188, 202, 221, 0.84);
+}
+
 .pvp-row-type-strip {
   display: flex;
   flex-wrap: wrap;
@@ -883,9 +887,56 @@ select {
 }
 
 .pvp-score-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
   font-weight: 800;
   letter-spacing: 0.02em;
   align-self: center;
+}
+
+.pvp-collection-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f7fbff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.pvp-collection-percent {
+  position: relative;
+  z-index: 1;
+}
+
+.pvp-collection-shield-badge {
+  width: 36px;
+  height: 42px;
+  clip-path: polygon(50% 0%, 90% 13%, 90% 62%, 50% 100%, 10% 62%, 10% 13%);
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.pvp-collection-tier-bronze {
+  background: linear-gradient(180deg, #c98f58 0%, #8c5733 100%);
+}
+
+.pvp-collection-tier-silver {
+  background: linear-gradient(180deg, #d6dee8 0%, #8b97a6 100%);
+}
+
+.pvp-collection-tier-gold {
+  background: linear-gradient(180deg, #f8dd78 0%, #bd9123 100%);
+}
+
+.pvp-collection-percent-only {
+  font-size: 0.86rem;
+  font-weight: 900;
+  color: #cfe6ff;
 }
 
 .pvp-meta-table-head {
@@ -1016,6 +1067,90 @@ select {
 
 .pvp-role-card .pvp-traits-row {
   margin-top: 6px;
+}
+
+.pvp-role-squad-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pvp-role-squad-grid .pvp-role-card {
+  margin-top: 0;
+}
+
+.pvp-squad-add {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-top: 0;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.pvp-squad-summary {
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.pvp-squad-editor {
+  --pvp-squad-action-width: 168px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.pvp-squad-input {
+  width: 78px;
+  min-width: 78px;
+  height: 30px;
+  padding: 0 8px;
+}
+
+.pvp-squad-ready-toggle {
+  margin: 0;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.pvp-squad-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: var(--pvp-squad-action-width);
+  transition: width 140ms ease;
+}
+
+.pvp-squad-primary {
+  width: var(--pvp-squad-action-width);
+  margin-left: auto;
+  min-height: 30px;
+  padding: 6px 10px;
+  transition: width 140ms ease;
+}
+
+.pvp-squad-actions .mode-pill {
+  flex: 1 1 0;
+  width: auto;
+  min-height: 30px;
+  margin-bottom: 0;
+  padding: 6px 10px;
+}
+
+.pvp-squad-delete {
+  margin-bottom: 0;
 }
 
 .pvp-trait-pill {
@@ -1356,6 +1491,10 @@ select {
 }
 
 @media (max-width: 900px) {
+  .pvp-role-squad-grid {
+    grid-template-columns: 1fr;
+  }
+
   .pvp-weakness-grid {
     grid-template-columns: 1fr;
   }

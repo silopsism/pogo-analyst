@@ -31,7 +31,7 @@
 
 
 <script src="/js/libs/jquery-3.3.1.min.js"></script>
-<script src="/js/interface/RSSReader.js?v=1.37.1.1"></script>
+<script src="/js/interface/RSSReader.js?v=1.37.2"></script>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XX55F32FKT"></script>
@@ -50,7 +50,7 @@
 
 	var host = "https://pvpoke.com/";
 	var webRoot = "/";
-	var siteVersion = "1.37.1.1";
+	var siteVersion = "1.37.2";
 
 	
 		var settings = {
@@ -1123,23 +1123,23 @@
 </div>
 </div>
 
-<script src="/js/battle/DamageCalculator.js?v=1.37.1.1"></script>
-<script src="/js/battle/actions/ActionLogic.js?v=1.37.1.1"></script>
-<script src="/js/battle/timeline/TimelineEvent.js?v=1.37.1.1"></script>
-<script src="/js/battle/timeline/TimelineAction.js?v=1.37.1.1"></script>
-<script src="/js/training/DecisionOption.js?v=1.37.1.1"></script>
-<script src="/js/battle/Battle.js?v=1.37.1.1"></script>
+<script src="/js/battle/DamageCalculator.js?v=1.37.2"></script>
+<script src="/js/battle/actions/ActionLogic.js?v=1.37.2"></script>
+<script src="/js/battle/timeline/TimelineEvent.js?v=1.37.2"></script>
+<script src="/js/battle/timeline/TimelineAction.js?v=1.37.2"></script>
+<script src="/js/training/DecisionOption.js?v=1.37.2"></script>
+<script src="/js/battle/Battle.js?v=1.37.2"></script>
 
-<script src="/js/GameMaster.js?v=1.37.1.1"></script>
-<script src="/js/pokemon/Pokemon.js?v=1.37.1.1"></script>
-<script src="/js/interface/RankingInterface.js?v=1.37.1.1"></script>
-<script src="/js/interface/ModalWindow.js?v=1.37.1.1"></script>
-<script src="/js/interface/PokeSearch.js?v=1.37.1.1"></script>
-<script src="/js/interface/PokeSelect.js?v=1.37.1.1"></script>
-<script src="/js/interface/PokeMultiSelect.js?v=1.37.1.1"></script>
-<script src="/js/battle/rankers/TeamRanker.js?v=1.37.1.1"></script>
-<script src="/js/RankingMain.js?v=1.37.1.1"></script>
-<script src="/js/libs/hexagon-chart.js?v=1.37.1.1"></script>
+<script src="/js/GameMaster.js?v=1.37.2"></script>
+<script src="/js/pokemon/Pokemon.js?v=1.37.2"></script>
+<script src="/js/interface/RankingInterface.js?v=1.37.2"></script>
+<script src="/js/interface/ModalWindow.js?v=1.37.2"></script>
+<script src="/js/interface/PokeSearch.js?v=1.37.2"></script>
+<script src="/js/interface/PokeSelect.js?v=1.37.2"></script>
+<script src="/js/interface/PokeMultiSelect.js?v=1.37.2"></script>
+<script src="/js/battle/rankers/TeamRanker.js?v=1.37.2"></script>
+<script src="/js/RankingMain.js?v=1.37.2"></script>
+<script src="/js/libs/hexagon-chart.js?v=1.37.2"></script>
 
 		</div><!--end #main-->
 	</div><!--end #main-wrap-->
@@ -1295,7 +1295,7 @@
 
 	
 	<footer>
-		<p class="copyright">Version <a href="https://github.com/pvpoke/pvpoke/releases">1.37.1.1</a> &copy; 2025 PvPoke LLC, released under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT license</a> | <a href="/privacy/">Privacy Policy</a></p>
+		<p class="copyright">Version <a href="https://github.com/pvpoke/pvpoke/releases">1.37.2</a> &copy; 2025 PvPoke LLC, released under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT license</a> | <a href="/privacy/">Privacy Policy</a></p>
 		<p>Logo and brand colors by <a class="domz-link" href="https://pogodomz.bio.link/" target="_blank">pogoDomz</a></p>
 		<p>Pokémon and Pokémon GO are copyright of The Pokémon Company, Niantic, Inc., and Nintendo. All trademarked images and names are property of their respective owners, and any such material is used on this site for educational purposes only. PvPoke LLC has no affiliation with The Pokémon Company, Niantic, Inc., or Nintendo.</p>
 	</footer>
@@ -1395,6 +1395,17 @@
 			  });
 		}
 
+		// disable mousewheel on a input number field when in focus
+		// (to prevent Chromium browsers change the value when scrolling)
+		$('body').on('focus', 'input[type=number]', function (e) {
+		$(this).on('wheel.disableScroll', function (e) {
+			e.preventDefault()
+		})
+		})
+		$('body').on('blur', 'input[type=number]', function (e) {
+		$(this).off('wheel.disableScroll')
+		})
+
 					// One-time custom group migration from cookies to localstorage
 
 			var jsonToMigrate = [];
@@ -1409,6 +1420,6 @@
 		
 	</script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fedeedbf8c173c2',t:'MTc3OTMwNzI4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"3fd709d73e4944d3bd43c817afae56b9","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"3fd709d73e4944d3bd43c817afae56b9","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a00e688398c60ade',t:'MTc3OTY0NzgxMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

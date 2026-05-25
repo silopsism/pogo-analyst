@@ -18,7 +18,7 @@ import {
   pokemonKey,
   resolvePrimaryFinalEvolution,
 } from "./evolution.ts";
-import { topGreatLeagueLevelUpCandidates } from "./pvp_leveling.ts";
+import { maxLevelUnderCapForIvs, topGreatLeagueLevelUpCandidates } from "./pvp_leveling.ts";
 import {
   computeRaidAttackers,
   raidMoveKey,
@@ -59,6 +59,10 @@ type ViewState = {
 
 type Mode = "lookup" | "raid" | "stats" | "pvp" | "rarity";
 type TypeFilterMode = "or" | "and";
+type PvpSquadEntry = {
+  percentile: number | null;
+  leagueReady: boolean;
+};
 
 const LIMITED_POKEMON = new Set(["eternatus", "zygarde", "cosmog", "poipole", "kubfu"]);
 
@@ -246,15 +250,39 @@ function cpAtLevel40(pokemon: PokemonEntry): number | null {
   return Math.max(10, cp);
 }
 
+function cpAtLevel50Hundo(pokemon: PokemonEntry): number | null {
+  const attack = pokemon.base_stats.attack;
+  const defense = pokemon.base_stats.defense;
+  const stamina = pokemon.base_stats.stamina;
+  if (!attack || !defense || !stamina) {
+    return null;
+  }
+  const cpm = 0.84029999;
+  const cp = Math.floor(((attack + 15) * Math.sqrt(defense + 15) * Math.sqrt(stamina + 15) * cpm * cpm) / 10);
+  return Math.max(10, cp);
+}
+
+function canReachLeagueCap(pokemon: PokemonEntry, league: PvpLeague): boolean {
+  if (league === "master") {
+    return true;
+  }
+  const maxCp = cpAtLevel50Hundo(pokemon);
+  if (maxCp === null) {
+    return true;
+  }
+  return maxCp >= PVP_LEAGUE_CP_CAP[league];
+}
+
 function requiresXlCandyForLeague(pokemon: PokemonEntry, league: PvpLeague): boolean {
   if (league === "master") {
     return false;
   }
+  const cap = PVP_LEAGUE_CP_CAP[league];
   const level40Cp = cpAtLevel40(pokemon);
-  if (level40Cp === null) {
-    return false;
-  }
-  return level40Cp < PVP_LEAGUE_CP_CAP[league];
+  const hundoNeedsXl = level40Cp !== null && level40Cp < cap;
+  const bulkLevel = maxLevelUnderCapForIvs(pokemon, cap, 0, 15, 15);
+  const bulkBuildNeedsXl = bulkLevel !== null && bulkLevel > 40;
+  return hundoNeedsXl || bulkBuildNeedsXl;
 }
 
 function attackMultiplierAgainstPokemon(
@@ -370,6 +398,10 @@ type TeamSaveDraft = {
 
 function pvpCacheKey(league: PvpLeague): string {
   return `pogo_pvp_meta_cache_${league}`;
+}
+
+function pvpSquadStorageKey(): string {
+  return "pogo_pvp_squad";
 }
 
 function readCachedPvpMeta(league: PvpLeague): GreatLeagueCombinedData | null {
@@ -877,6 +909,13 @@ function pokemonSpeciesIds(pokemon: PokemonEntry): string[] {
   return ids;
 }
 
+function pvpIvTier(percentile: number | null): "bronze" | "silver" | "gold" {
+  const value = percentile ?? 0;
+  if (value >= 90) return "gold";
+  if (value >= 67) return "silver";
+  return "bronze";
+}
+
 function pvpFormAliasToLocalForm(alias: string): string {
   const normalized = normalizeSpeciesId(alias);
   switch (normalized) {
@@ -888,6 +927,7 @@ function pvpFormAliasToLocalForm(alias: string): string {
     case "land":
     case "full_belly":
     case "shield":
+    case "blade":
       return "normal";
     default:
       return normalized;
@@ -900,6 +940,22 @@ function pvpRowBaseName(name: string): string {
     .replace(/\s*\([^)]*\)\s*/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function pvpRowDisplayName(name: string): string {
+  const base = pvpRowBaseName(name);
+  if (normalizeQuery(base) !== "gourgeist") {
+    return base;
+  }
+  const nonShadowParens = [...name.matchAll(/\(([^)]+)\)/g)]
+    .map((match) => match[1].trim())
+    .filter((token) => normalizeQuery(token) !== "shadow");
+  const sizeToken = nonShadowParens[0];
+  return sizeToken ? `${base} (${sizeToken})` : base;
+}
+
+function pvpRowIsShadow(name: string): boolean {
+  return /\(\s*shadow\s*\)/i.test(name);
 }
 
 function resolveLocalPokemonForPvpRow(
@@ -1591,12 +1647,16 @@ function PvpMetaTable({
   onSelect,
   pokemonByCanonicalId,
   league,
+  collectionViewEnabled,
+  squadByCanonicalId,
 }: {
   rows: GreatLeagueCombinedRow[];
   selectedId: string | null;
   onSelect: (row: GreatLeagueCombinedRow) => void;
   pokemonByCanonicalId: Map<string, PokemonEntry>;
   league: PvpLeague;
+  collectionViewEnabled: boolean;
+  squadByCanonicalId: Record<string, PvpSquadEntry | undefined>;
 }) {
   return (
     <section className="panel ranking-panel raid-panel">
@@ -1610,6 +1670,7 @@ function PvpMetaTable({
         {rows.map((row) => {
           const isActive = selectedId === row.canonical_id;
           const pokemon = pokemonByCanonicalId.get(row.canonical_id) ?? null;
+          const squadEntry = squadByCanonicalId[row.canonical_id];
           const scoreBand = pvpScoreBand(row.pvpoke.score);
           const primaryType = pokemon?.types?.[0] ?? null;
           const localMoveTypes = new Map<string, string | null>();
@@ -1637,7 +1698,8 @@ function PvpMetaTable({
                 {pokemon ? <PokemonIcon pokemon={pokemon} className="pokemon-icon pokemon-icon-table" /> : null}
                 <span className="pvp-name-stack">
                   <strong className="pvp-name-title">
-                    {row.name}
+                    {pvpRowIsShadow(row.name) ? <em className="pvp-shadow-prefix">Shadow </em> : null}
+                    {pvpRowDisplayName(row.name)}
                     {pokemon && requiresXlCandyForLeague(pokemon, league) ? <span className="pvp-levelup-xl-tag">XL</span> : null}
                   </strong>
                   <span className="pvp-row-moveset">
@@ -1673,7 +1735,23 @@ function PvpMetaTable({
                   <span className="raid-note">n/a</span>
                 )}
               </span>
-              <span className="pvp-score-cell">{row.pvpoke.score.toFixed(1)}</span>
+              <span className="pvp-score-cell">
+                <span>{row.pvpoke.score.toFixed(1)}</span>
+                {collectionViewEnabled && squadEntry ? (
+                  squadEntry.leagueReady ? (
+                    <span
+                      className={`pvp-collection-badge pvp-collection-shield-badge pvp-collection-tier-${pvpIvTier(squadEntry.percentile)}`}
+                      title={`${squadEntry.percentile ?? "n/a"}%`}
+                    >
+                      <span className="pvp-collection-percent">{squadEntry.percentile ?? "n/a"}%</span>
+                    </span>
+                  ) : (
+                    <span className="pvp-collection-percent-only" title={`${squadEntry.percentile ?? "n/a"}%`}>
+                      <span className="pvp-collection-percent">{squadEntry.percentile ?? "n/a"}%</span>
+                    </span>
+                  )
+                ) : null}
+              </span>
             </button>
           );
         })}
@@ -1689,6 +1767,9 @@ function PvpMetaDetail({
   meaningfulFormCountByName,
   allPokemon,
   league,
+  squadEntry,
+  onSaveSquad,
+  onDeleteSquad,
 }: {
   row: GreatLeagueCombinedRow | null;
   pokemon: PokemonEntry | null;
@@ -1696,7 +1777,26 @@ function PvpMetaDetail({
   meaningfulFormCountByName: Map<string, number>;
   allPokemon: PokemonEntry[];
   league: PvpLeague;
+  squadEntry: PvpSquadEntry | null;
+  onSaveSquad: (rowId: string, entry: PvpSquadEntry) => void;
+  onDeleteSquad: (rowId: string) => void;
 }) {
+  const [percentileDraft, setPercentileDraft] = useState("");
+  const [leagueReadyDraft, setLeagueReadyDraft] = useState(false);
+  const [squadEditorOpen, setSquadEditorOpen] = useState(false);
+
+  useEffect(() => {
+    if (!row) {
+      setPercentileDraft("");
+      setLeagueReadyDraft(false);
+      setSquadEditorOpen(false);
+      return;
+    }
+    setPercentileDraft(squadEntry?.percentile === null || squadEntry?.percentile === undefined ? "" : String(squadEntry.percentile));
+    setLeagueReadyDraft(Boolean(squadEntry?.leagueReady));
+    setSquadEditorOpen(false);
+  }, [league, row?.canonical_id, squadEntry?.leagueReady, squadEntry?.percentile]);
+
   if (!row) {
     return (
       <section className="panel raid-banner">
@@ -1708,7 +1808,7 @@ function PvpMetaDetail({
   return (
     <section className="panel raid-banner">
       <div className="panel-header">
-        <h3>#{row.pvpoke.rank} {row.name}</h3>
+        <h3>#{row.pvpoke.rank} {pvpRowIsShadow(row.name) ? <em className="pvp-shadow-prefix">Shadow </em> : null}{pvpRowDisplayName(row.name)}</h3>
         <span>Score {row.pvpoke.score.toFixed(1)}</span>
       </div>
       <div className="pvp-local-card">
@@ -1769,16 +1869,67 @@ function PvpMetaDetail({
           </div>
         ) : null}
 
-        <div className="pvp-role-card">
-          <div className="lookup-label">Roles</div>
-          <div className="pvp-traits-row">
-            {row.pvpoke.traits.length ? (
-              row.pvpoke.traits.map((trait) => (
-                <TypeBadge key={`${row.canonical_id}-trait-${trait}`} type={null} className="pvp-trait-pill" label={trait} />
-              ))
-            ) : (
-              <span className="raid-note">No roles available.</span>
-            )}
+        <div className="pvp-role-squad-grid">
+          <div className="pvp-role-card">
+            <div className="lookup-label">Roles</div>
+            <div className="pvp-traits-row">
+              {row.pvpoke.traits.length ? (
+                row.pvpoke.traits.map((trait) => (
+                  <TypeBadge key={`${row.canonical_id}-trait-${trait}`} type={null} className="pvp-trait-pill" label={trait} />
+                ))
+              ) : (
+                <span className="raid-note">No roles available.</span>
+              )}
+            </div>
+          </div>
+          <div className="pvp-role-card">
+            <div className="lookup-label">Squad ({league.toUpperCase()})</div>
+            <div className="pvp-squad-editor">
+              {squadEditorOpen ? (
+                <>
+                  <input
+                    className="pvp-squad-input"
+                    value={percentileDraft}
+                    placeholder="IV %"
+                    onChange={(event) => setPercentileDraft(event.target.value)}
+                  />
+                  <label className="toggle-field pvp-squad-ready-toggle">
+                    <input
+                      type="checkbox"
+                      checked={leagueReadyDraft}
+                      onChange={(event) => setLeagueReadyDraft(event.target.checked)}
+                    />
+                    <span>Ready</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="mode-pill pvp-squad-primary"
+                    onClick={() => {
+                      const parsed = Number.parseFloat(percentileDraft.trim());
+                      const percentile = Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : null;
+                      onSaveSquad(row.canonical_id, { percentile, leagueReady: leagueReadyDraft });
+                      setSquadEditorOpen(false);
+                    }}
+                  >
+                    Save
+                  </button>
+                </>
+              ) : squadEntry ? (
+                <>
+                  <span className="raid-note">{`${squadEntry.percentile ?? "n/a"}% ${squadEntry.leagueReady ? "Ready" : "Not ready"}`}</span>
+                  <div className="pvp-squad-actions">
+                    <button type="button" className="mode-pill pvp-squad-primary" onClick={() => setSquadEditorOpen(true)}>
+                      Edit
+                    </button>
+                    <button type="button" className="mode-pill pvp-squad-delete" onClick={() => onDeleteSquad(row.canonical_id)}>
+                      Delete
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <button type="button" className="mode-pill pvp-squad-add" onClick={() => setSquadEditorOpen(true)}>+</button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1952,7 +2103,7 @@ function TeamBuilderPanel({
                     <span className="pokemon-icon pokemon-icon-fallback">{entry.row.name.slice(0, 2).toUpperCase()}</span>
                   )}
                   <span className="team-slot-title-copy">
-                    <strong>#{entry.row.pvpoke.rank} {entry.row.name}</strong>
+                    <strong>#{entry.row.pvpoke.rank} {entry.row && pvpRowIsShadow(entry.row.name) ? <em className="pvp-shadow-prefix">Shadow </em> : null}{pvpRowDisplayName(entry.row.name)}</strong>
                     {entry.pokemon ? (
                       <span className="type-row compact raid-type-icons team-slot-type-icons">
                         {entry.pokemon.types.map((type) => (
@@ -2147,6 +2298,12 @@ export default function App() {
   const [pvpRecommendationIds, setPvpRecommendationIds] = useState<string[] | null>(null);
   const [pvpSelectedId, setPvpSelectedId] = useState<string | null>(null);
   const [pvpTeamBuilderEnabled, setPvpTeamBuilderEnabled] = useState(false);
+  const [pvpCollectionViewEnabled, setPvpCollectionViewEnabled] = useState(false);
+  const [pvpSquadByLeague, setPvpSquadByLeague] = useState<Record<PvpLeague, Record<string, PvpSquadEntry>>>({
+    great: {},
+    ultra: {},
+    master: {},
+  });
   const [teamBuilderSlots, setTeamBuilderSlots] = useState<Array<string | null>>([null, null, null]);
   const [teamBuilderSlotMoves, setTeamBuilderSlotMoves] = useState<TeamSlotMoves[]>([
     { fast: null, charged1: null, charged2: null },
@@ -2248,6 +2405,32 @@ export default function App() {
       // ignore persistence failures
     }
   }, [pvpLeague]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(pvpSquadStorageKey());
+      if (!raw) {
+        return;
+      }
+      const parsed = JSON.parse(raw) as Partial<Record<PvpLeague, Record<string, PvpSquadEntry>>>;
+      setPvpSquadByLeague({
+        great: parsed.great ?? {},
+        ultra: parsed.ultra ?? {},
+        master: parsed.master ?? {},
+      });
+    } catch {
+      // ignore bad local storage payload
+    }
+  }, []);
+
+  const persistPvpSquadByLeague = (next: Record<PvpLeague, Record<string, PvpSquadEntry>>) => {
+    setPvpSquadByLeague(next);
+    try {
+      localStorage.setItem(pvpSquadStorageKey(), JSON.stringify(next));
+    } catch {
+      // ignore persistence failures
+    }
+  };
 
   useEffect(() => {
     setState((current) => {
@@ -2449,6 +2632,9 @@ export default function App() {
         if (excludePvpXlRequiredPokemon && pokemon && requiresXlCandyForLeague(pokemon, pvpLeague)) {
           return null;
         }
+        if (pokemon && !canReachLeagueCap(pokemon, pvpLeague)) {
+          return null;
+        }
         if (effectivePvpSelectedTypes.length !== availableTypes.length) {
           const typePool = pokemon?.types ?? row.types ?? [];
           const matchesSelectedTypes =
@@ -2537,6 +2723,29 @@ export default function App() {
     });
     return index;
   }, [pvpRowsWithLocal]);
+  const pvpLeagueSquad = useMemo(() => pvpSquadByLeague[pvpLeague] ?? {}, [pvpLeague, pvpSquadByLeague]);
+  const savePvpSquadEntry = (rowId: string, entry: PvpSquadEntry) => {
+    const next: Record<PvpLeague, Record<string, PvpSquadEntry>> = {
+      ...pvpSquadByLeague,
+      [pvpLeague]: {
+        ...(pvpSquadByLeague[pvpLeague] ?? {}),
+        [rowId]: entry,
+      },
+    };
+    persistPvpSquadByLeague(next);
+  };
+  const deletePvpSquadEntry = (rowId: string) => {
+    const currentLeagueEntries = { ...(pvpSquadByLeague[pvpLeague] ?? {}) };
+    if (!(rowId in currentLeagueEntries)) {
+      return;
+    }
+    delete currentLeagueEntries[rowId];
+    const next: Record<PvpLeague, Record<string, PvpSquadEntry>> = {
+      ...pvpSquadByLeague,
+      [pvpLeague]: currentLeagueEntries,
+    };
+    persistPvpSquadByLeague(next);
+  };
   const teamBuilderResolvedSlots = useMemo(
     () => teamBuilderSlots.map((id) => (id ? pvpEntryByCanonicalId.get(id) ?? null : null)),
     [pvpEntryByCanonicalId, teamBuilderSlots],
@@ -3473,6 +3682,14 @@ export default function App() {
                 {pvpRefreshLoading ? "Refreshing PvPoke..." : "Refresh PvPoke Data"}
               </button>
               {pvpRefreshStatus ? <div className="pvp-refresh-status">{pvpRefreshStatus}</div> : null}
+              <label className="toggle-field">
+                <input
+                  type="checkbox"
+                  checked={pvpCollectionViewEnabled}
+                  onChange={(event) => setPvpCollectionViewEnabled(event.target.checked)}
+                />
+                <span>Collection View</span>
+              </label>
               {pvpTeamBuilderEnabled ? (
                 <>
                   <label className="field">
@@ -4086,6 +4303,9 @@ export default function App() {
                     meaningfulFormCountByName={meaningfulFormCountByName}
                     allPokemon={visiblePokemon}
                     league={pvpLeague}
+                    squadEntry={selectedPvpRow ? pvpLeagueSquad[selectedPvpRow.row.canonical_id] ?? null : null}
+                    onSaveSquad={savePvpSquadEntry}
+                    onDeleteSquad={deletePvpSquadEntry}
                   />
                 )}
 
@@ -4138,6 +4358,8 @@ export default function App() {
                     }}
                     pokemonByCanonicalId={pvpPokemonByCanonicalId}
                     league={pvpLeague}
+                    collectionViewEnabled={pvpCollectionViewEnabled}
+                    squadByCanonicalId={pvpLeagueSquad}
                   />
                 </div>
               </div>

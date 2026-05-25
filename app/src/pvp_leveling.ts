@@ -367,3 +367,27 @@ export function topGreatLeagueLevelUpCandidates(
 
   return rebuilt.slice(0, limit);
 }
+
+export function maxLevelUnderCapForIvs(
+  pokemon: PokemonEntry,
+  cap: number,
+  ivAttack: number,
+  ivDefense: number,
+  ivStamina: number,
+): number | null {
+  const baseAttack = pokemon.base_stats.attack ?? 0;
+  const baseDefense = pokemon.base_stats.defense ?? 0;
+  const baseStamina = pokemon.base_stats.stamina ?? 0;
+  if (baseAttack <= 0 || baseDefense <= 0 || baseStamina <= 0) {
+    return null;
+  }
+
+  let bestLevel: number | null = null;
+  for (const level of LEVELS) {
+    const cp = cpAt(baseAttack, baseDefense, baseStamina, ivAttack, ivDefense, ivStamina, level);
+    if (cp <= cap) {
+      bestLevel = level;
+    }
+  }
+  return bestLevel;
+}

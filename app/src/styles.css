@@ -172,6 +172,17 @@ select {
   gap: 12px;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.15);
+}
+
 .type-filter-header-row {
   align-items: center;
 }

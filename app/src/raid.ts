@@ -44,6 +44,8 @@ export type RaidAttackerRow = {
 // Tunable raid-pressure calibration. Lowering this softens boss DPS without changing the underlying damage formula.
 export const BOSS_DPS_SCALE = 0.8;
 export const RAID_REPLACEMENT_DELAY_SECONDS = 2;
+const SHADOW_ATTACK_MULTIPLIER = 1.2;
+const SHADOW_DEFENSE_MULTIPLIER = 5 / 6;
 
 function normalize(value: string): string {
   return value.trim().toLowerCase();
@@ -101,6 +103,20 @@ function getAttack(value: number | null | undefined): number {
 
 function getDefense(value: number | null | undefined): number {
   return Math.max(1, value ?? 1);
+}
+
+function isShadowPokemon(pokemon: PokemonEntry): boolean {
+  return normalize(pokemon.form) === "shadow" || normalize(pokemon.name).startsWith("shadow ");
+}
+
+function attackWithCombatModifiers(pokemon: PokemonEntry): number {
+  const base = getAttack(pokemon.base_stats.attack);
+  return isShadowPokemon(pokemon) ? base * SHADOW_ATTACK_MULTIPLIER : base;
+}
+
+function defenseWithCombatModifiers(pokemon: PokemonEntry): number {
+  const base = getDefense(pokemon.base_stats.defense);
+  return isShadowPokemon(pokemon) ? base * SHADOW_DEFENSE_MULTIPLIER : base;
 }
 
 function effectiveHp(pokemon: PokemonEntry): number {
@@ -234,8 +250,8 @@ function simulateBossIncomingDps(
   weather: WeatherName,
   typeEffectiveness: MergedData["type_effectiveness"],
 ): number | null {
-  const bossAttack = getAttack(boss.base_stats.attack);
-  const attackerDefense = getDefense(attacker.base_stats.defense);
+  const bossAttack = attackWithCombatModifiers(boss);
+  const attackerDefense = defenseWithCombatModifiers(attacker);
 
   const fastDamage = moveDamage(
     scenario.fast_move,
@@ -283,8 +299,8 @@ function simulateAttackerCycle(
   weather: WeatherName,
   typeEffectiveness: MergedData["type_effectiveness"],
 ): { estimated_dps: number; total_damage: number; attack_cycle_seconds: number } | null {
-  const attackerAttack = getAttack(attacker.base_stats.attack);
-  const bossDefense = getDefense(boss.base_stats.defense);
+  const attackerAttack = attackWithCombatModifiers(attacker);
+  const bossDefense = defenseWithCombatModifiers(boss);
   const fastGain = moveEnergyGain(fastMove);
   const chargedCost = moveEnergyCost(chargedMove);
   const fastDuration = moveDurationSeconds(fastMove);
@@ -359,8 +375,8 @@ function computeBaseCycleDps(
   weather: WeatherName,
   typeEffectiveness: MergedData["type_effectiveness"],
 ): number | null {
-  const attackerAttack = getAttack(attacker.base_stats.attack);
-  const bossDefense = getDefense(boss.base_stats.defense);
+  const attackerAttack = attackWithCombatModifiers(attacker);
+  const bossDefense = defenseWithCombatModifiers(boss);
   const fastGain = moveEnergyGain(fastMove);
   const chargedCost = moveEnergyCost(chargedMove);
   const fastDuration = moveDurationSeconds(fastMove);
@@ -425,9 +441,25 @@ function evaluateSpikedPairAgainstScenario(
   replacementDelaySeconds: number,
   typeEffectiveness: MergedData["type_effectiveness"],
 ): PairOutcome | null {
+  const combatAttacker: PokemonEntry = {
+    ...attacker,
+    base_stats: {
+      ...attacker.base_stats,
+      attack: attackWithCombatModifiers(attacker),
+      defense: defenseWithCombatModifiers(attacker),
+    },
+  };
+  const combatBoss: PokemonEntry = {
+    ...boss,
+    base_stats: {
+      ...boss.base_stats,
+      attack: attackWithCombatModifiers(boss),
+      defense: defenseWithCombatModifiers(boss),
+    },
+  };
   const life: RaidLifeEventResult | null = simulateDeterministicRaidLife({
-    attacker,
-    boss,
+    attacker: combatAttacker,
+    boss: combatBoss,
     attackerFastMove: fastMove,
     attackerChargedMove: chargedMove,
     bossFastMove: scenario.fast_move,
@@ -446,8 +478,8 @@ function evaluateSpikedPairAgainstScenario(
     raidDurationSeconds,
     replacementDelaySeconds,
     maxCopies: 6,
-    attacker,
-    boss,
+    attacker: combatAttacker,
+    boss: combatBoss,
     attackerFastMove: fastMove,
     attackerChargedMove: chargedMove,
     bossFastMove: scenario.fast_move,

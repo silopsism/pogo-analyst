@@ -12,8 +12,24 @@ const POKEMON_SPECIES_URL = "/data/pokemon_species.json";
 const LEEKDUCK_RAID_BOSSES_URL = "https://leekduck.com/raid-bosses/";
 const POGOAPI_RAID_BOSSES_URL = "https://pogoapi.net/api/v1/raid_bosses.json";
 const LOCAL_RAID_BOSSES_URL = "/data/raw/pogoapi/raid_bosses.json";
+const POGOAPI_SHADOW_POKEMON_URL = "https://pogoapi.net/api/v1/shadow_pokemon.json";
+const LOCAL_SHADOW_POKEMON_URL = "/data/raw/pogoapi/shadow_pokemon.json";
+const POGOAPI_MEGA_POKEMON_URL = "https://pogoapi.net/api/v1/mega_pokemon.json";
+const LOCAL_MEGA_POKEMON_URL = "/data/raw/pogoapi/mega_pokemon.json";
 
 export type PvpLeague = "great" | "ultra" | "master";
+export type MegaPokemonEntry = {
+  pokemon_id: number;
+  pokemon_name: string;
+  mega_name: string;
+  form: string;
+  stats?: {
+    base_attack?: number;
+    base_defense?: number;
+    base_stamina?: number;
+  };
+  type?: string[];
+};
 
 export async function refreshPvpMetaData(league: PvpLeague): Promise<void> {
   const response = await fetch("/__refresh/pvp-meta", {
@@ -227,6 +243,48 @@ export async function loadCurrentRaidBossesData(): Promise<CurrentRaidBossesData
     };
   }
   return liveCurrent ?? pogoPayload ?? null;
+}
+
+export async function loadShadowPokemonDexIds(): Promise<number[]> {
+  const sources = [LOCAL_SHADOW_POKEMON_URL, POGOAPI_SHADOW_POKEMON_URL];
+  for (const source of sources) {
+    try {
+      const response = await fetch(source, { cache: "no-store" });
+      if (!response.ok) {
+        continue;
+      }
+      const payload = (await response.json()) as Record<string, { id?: number }>;
+      const ids = Object.values(payload)
+        .map((entry) => Number(entry?.id))
+        .filter((value) => Number.isFinite(value))
+        .map((value) => Number(value));
+      if (ids.length) {
+        return Array.from(new Set(ids)).sort((a, b) => a - b);
+      }
+    } catch {
+      continue;
+    }
+  }
+  return [];
+}
+
+export async function loadMegaPokemonEntries(): Promise<MegaPokemonEntry[]> {
+  const sources = [LOCAL_MEGA_POKEMON_URL, POGOAPI_MEGA_POKEMON_URL];
+  for (const source of sources) {
+    try {
+      const response = await fetch(source, { cache: "no-store" });
+      if (!response.ok) {
+        continue;
+      }
+      const payload = (await response.json()) as MegaPokemonEntry[];
+      if (Array.isArray(payload) && payload.length) {
+        return payload.filter((entry) => Number.isFinite(Number(entry?.pokemon_id)));
+      }
+    } catch {
+      continue;
+    }
+  }
+  return [];
 }
 
 export function pokemonLabel(pokemon: PokemonEntry): string {

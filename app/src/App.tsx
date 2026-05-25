@@ -1,16 +1,18 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, useTransition, type CSSProperties } from "react";
 import {
   allTypes,
   formatNumber,
   loadPvpMetaData,
   loadMergedData,
   loadCurrentRaidBossesData,
+  loadMegaPokemonEntries,
   loadPokemonSpeciesData,
+  loadShadowPokemonDexIds,
   refreshPvpMetaData,
   loadSpawnRarityData,
   normalizeQuery,
 } from "./data.ts";
-import type { PvpLeague } from "./data.ts";
+import type { MegaPokemonEntry, PvpLeague } from "./data.ts";
 import {
   evolutionFamilyMembers,
   finalEvolutionOptions,
@@ -50,6 +52,8 @@ type ViewState = {
   spawnRarityData: SpawnRarity[];
   pokemonSpeciesData: PokemonSpecies[];
   raidBossesData: CurrentRaidBossesData | null;
+  shadowPokemonDexIds: number[];
+  megaPokemonEntries: MegaPokemonEntry[];
   error: string | null;
   pvpMetaError: string | null;
   rarityError: string | null;
@@ -271,6 +275,32 @@ function canReachLeagueCap(pokemon: PokemonEntry, league: PvpLeague): boolean {
     return true;
   }
   return maxCp >= PVP_LEAGUE_CP_CAP[league];
+}
+
+function isShadowFormPokemon(pokemon: PokemonEntry): boolean {
+  return normalizeQuery(pokemon.form) === "shadow" || normalizeQuery(pokemon.name).startsWith("shadow ");
+}
+
+function toShadowVariant(pokemon: PokemonEntry): PokemonEntry {
+  return {
+    ...pokemon,
+    name: pvpRowDisplayName(pokemon.name),
+    form: "Shadow",
+  };
+}
+
+function toMegaVariant(pokemon: PokemonEntry, mega: MegaPokemonEntry): PokemonEntry {
+  return {
+    ...pokemon,
+    name: mega.mega_name || `Mega ${pokemon.name}`,
+    form: "Mega",
+    types: Array.isArray(mega.type) && mega.type.length ? mega.type : pokemon.types,
+    base_stats: {
+      attack: mega.stats?.base_attack ?? pokemon.base_stats.attack,
+      defense: mega.stats?.base_defense ?? pokemon.base_stats.defense,
+      stamina: mega.stats?.base_stamina ?? pokemon.base_stats.stamina,
+    },
+  };
 }
 
 function requiresXlCandyForLeague(pokemon: PokemonEntry, league: PvpLeague): boolean {
@@ -936,6 +966,7 @@ function pvpFormAliasToLocalForm(alias: string): string {
 
 function pvpRowBaseName(name: string): string {
   return name
+    .replace(/^(shadow\s+)+/i, "")
     .replace(/\s*\(shadow\)\s*/gi, " ")
     .replace(/\s*\([^)]*\)\s*/g, " ")
     .replace(/\s+/g, " ")
@@ -1473,8 +1504,11 @@ function RaidAttackersTable({
         </div>
         {displayRows.map((displayEntry) => {
           const entry = displayEntry.row;
-          const formLabel =
+          const isShadow = isShadowFormPokemon(entry.pokemon) || pvpRowIsShadow(entry.pokemon.name);
+          const baseDisplayName = pvpRowDisplayName(entry.pokemon.name);
+          const rawFormLabel =
             displayEntry.forms.size > 1 ? "Various" : pokemonDisplayForm(entry.pokemon, meaningfulFormCountByName);
+          const formLabel = rawFormLabel && normalizeQuery(rawFormLabel) === "shadow" ? null : rawFormLabel;
           const isSpotlight =
             spotlightName !== null && normalizeQuery(entry.pokemon.name) === spotlightName;
           return (
@@ -1485,7 +1519,10 @@ function RaidAttackersTable({
               <span className="pokemon-name-cell raid-pokemon-cell">
                 <PokemonIcon pokemon={entry.pokemon} className="pokemon-icon pokemon-icon-table" />
                 <span className="pokemon-name-inline">
-                  <strong>{entry.pokemon.name}</strong>
+                  <strong>
+                    {isShadow ? <em className="pvp-shadow-prefix">Shadow </em> : null}
+                    {baseDisplayName}
+                  </strong>
                   {formLabel ? (
                     <span className="pokemon-form-inline"> ({formLabel})</span>
                   ) : null}
@@ -2242,6 +2279,7 @@ function TeamBuilderPanel({
 }
 
 export default function App() {
+  const [isRaidTogglePending, startRaidToggleTransition] = useTransition();
   const [pvpLeague, setPvpLeague] = useState<PvpLeague>(() => {
     try {
       const stored = localStorage.getItem("pogo_pvp_selected_league");
@@ -2256,6 +2294,8 @@ export default function App() {
     spawnRarityData: [],
     pokemonSpeciesData: [],
     raidBossesData: null,
+    shadowPokemonDexIds: [],
+    megaPokemonEntries: [],
     error: null,
     pvpMetaError: null,
     rarityError: null,
@@ -2285,6 +2325,8 @@ export default function App() {
   const [raidIncludeKey, setRaidIncludeKey] = useState<string | null>(null);
   const [raidDurationPreset, setRaidDurationPreset] = useState<"30" | "60" | "90" | "120" | "150" | "180">("120");
   const [raidSortMode, setRaidSortMode] = useState<RaidSortMode>("raid_dps");
+  const [includeMegaAttackers, setIncludeMegaAttackers] = useState(true);
+  const [includeShadowAttackers, setIncludeShadowAttackers] = useState(false);
   const [maxMovesets, setMaxMovesets] = useState(1);
   const [statsMaxMovesets, setStatsMaxMovesets] = useState(1);
   const [cpMode, setCpMode] = useState<CpMode>("level50");
@@ -2349,8 +2391,10 @@ export default function App() {
         }
         return { __error: "Failed to load current raid bosses data" } as const;
       }),
+      loadShadowPokemonDexIds().catch(() => []),
+      loadMegaPokemonEntries().catch(() => []),
     ])
-      .then(([data, spawnRarityResult, pokemonSpeciesResult, raidBossesResult]) => {
+      .then(([data, spawnRarityResult, pokemonSpeciesResult, raidBossesResult, shadowPokemonDexIds, megaPokemonEntries]) => {
         if (!active) {
           return;
         }
@@ -2371,6 +2415,8 @@ export default function App() {
           spawnRarityData,
           pokemonSpeciesData,
           raidBossesData,
+          shadowPokemonDexIds,
+          megaPokemonEntries,
           error: null,
           rarityError: rarityError || null,
           raidBossesError,
@@ -2387,6 +2433,8 @@ export default function App() {
           spawnRarityData: [],
           pokemonSpeciesData: [],
           raidBossesData: null,
+          shadowPokemonDexIds: [],
+          megaPokemonEntries: [],
           error: error instanceof Error ? error.message : "Failed to load merged data",
           rarityError: null,
           raidBossesError: null,
@@ -3105,9 +3153,29 @@ export default function App() {
     if (!resolvedRaidBoss) {
       return [];
     }
-    const attackPool = visiblePokemon.filter(
+    const baseAttackPool = visiblePokemon.filter(
       (entry) => entry.evolution.is_final_evolution || entry.evolution.line_names.length === 1,
     );
+    const canonicalShadowDexes = new Set(state.shadowPokemonDexIds);
+    const megaByDex = new Map<number, MegaPokemonEntry[]>();
+    state.megaPokemonEntries.forEach((mega) => {
+      const dex = Number(mega.pokemon_id);
+      if (!Number.isFinite(dex)) {
+        return;
+      }
+      const current = megaByDex.get(dex) ?? [];
+      current.push(mega);
+      megaByDex.set(dex, current);
+    });
+    const attackPool = [
+      ...baseAttackPool.filter((entry) => !isShadowFormPokemon(entry)),
+      ...baseAttackPool
+        .filter((entry) => !isShadowFormPokemon(entry) && canonicalShadowDexes.has(entry.dex))
+        .map((entry) => toShadowVariant(entry)),
+      ...baseAttackPool
+        .filter((entry) => !isShadowFormPokemon(entry))
+        .flatMap((entry) => (megaByDex.get(entry.dex) ?? []).map((mega) => toMegaVariant(entry, mega))),
+    ];
     return computeRaidAttackers(
       attackPool,
       resolvedRaidBoss.pokemon,
@@ -3130,9 +3198,23 @@ export default function App() {
     resolvedRaidBoss,
     maxMovesets,
     raidSimulationMode,
+    state.megaPokemonEntries,
+    state.shadowPokemonDexIds,
     visiblePokemon,
     typeEffectiveness,
   ]);
+
+  const visibleRaidAttackers = useMemo(() => {
+    return raidAttackers.filter((entry) => {
+      if (!includeShadowAttackers && isShadowFormPokemon(entry.pokemon)) {
+        return false;
+      }
+      if (!includeMegaAttackers && normalizeQuery(entry.pokemon.form) === "mega") {
+        return false;
+      }
+      return true;
+    });
+  }, [includeMegaAttackers, includeShadowAttackers, raidAttackers]);
 
   const statsFilteredPokemon = useMemo(() => {
     if (!statsGenerationFilter.length) {
@@ -3343,7 +3425,7 @@ export default function App() {
             <h2>Explorer</h2>
             <span>
               {mode === "raid"
-                ? `${raidAttackers.length} results`
+                ? `${visibleRaidAttackers.length} results`
                 : mode === "pvp"
                   ? `${pvpFilteredRows.length} results`
                   : `${statsRows.length} results`}
@@ -3954,6 +4036,34 @@ export default function App() {
                   <option value="base_dps">Base DPS</option>
                 </select>
               </label>
+
+              <label className="field checkbox-row">
+                <span>Include shadow attackers</span>
+                <input
+                  type="checkbox"
+                  checked={includeShadowAttackers}
+                  onChange={(event) => {
+                    const checked = event.target.checked;
+                    startRaidToggleTransition(() => {
+                      setIncludeShadowAttackers(checked);
+                    });
+                  }}
+                />
+              </label>
+              <label className="field checkbox-row">
+                <span>Include mega attackers</span>
+                <input
+                  type="checkbox"
+                  checked={includeMegaAttackers}
+                  onChange={(event) => {
+                    const checked = event.target.checked;
+                    startRaidToggleTransition(() => {
+                      setIncludeMegaAttackers(checked);
+                    });
+                  }}
+                />
+              </label>
+              {isRaidTogglePending ? <div className="raid-note">Updating attackers...</div> : null}
             </>
             )
           )}
@@ -4381,7 +4491,7 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  <span>{selectedRaidBossOption ? `${Math.min(20, raidAttackers.length)} shown` : "Choose a boss"}</span>
+                  <span>{selectedRaidBossOption ? `${Math.min(20, visibleRaidAttackers.length)} shown` : "Choose a boss"}</span>
                 </div>
                 {selectedRaidBossOption ? (
                   <>
@@ -4417,7 +4527,7 @@ export default function App() {
 
               {selectedRaidBossOption ? (
                 <RaidAttackersTable
-                  rows={raidAttackers}
+                  rows={visibleRaidAttackers}
                   sortMode={raidSortMode}
                   spotlightPokemon={raidIncludePokemon}
                   meaningfulFormCountByName={meaningfulFormCountByName}

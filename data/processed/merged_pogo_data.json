@@ -107188,6 +107188,19 @@
             "raw_dps": 45.0,
             "stab_multiplier": 1.2,
             "stab_dps": 54.0
+          },
+          {
+            "name": "Dragon Ascent",
+            "type": "Flying",
+            "power": 140,
+            "duration": 3500,
+            "turn_duration": null,
+            "energy_delta": -50,
+            "move_kind": "elite_charged",
+            "raid_dps": 40.0,
+            "raw_dps": 40.0,
+            "stab_multiplier": 1.2,
+            "stab_dps": 48.0
           }
         ]
       },
@@ -107230,6 +107243,16 @@
             "raw_dps": 42.0,
             "stab_multiplier": 1.2,
             "raid_dps": 50.4
+          },
+          {
+            "name": "Dragon Ascent",
+            "move_kind": "elite_charged",
+            "type": "Flying",
+            "power": 140,
+            "duration": 3500,
+            "raw_dps": 40.0,
+            "stab_multiplier": 1.2,
+            "raid_dps": 48.0
           },
           {
             "name": "Outrage",

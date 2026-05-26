@@ -362,6 +362,16 @@ def build_rows_from_pokeminers(
             elite_cinematic_moves = [
                 gm_move_catalog_name(move_id) for move_id in ensure_list(pokemon_settings.get("eliteCinematicMove")) if move_id
             ]
+            # Some special/legacy charged moves (e.g. Dragon Ascent on Rayquaza)
+            # are carried under nonTm move pools instead of elite pools.
+            non_tm_quick_moves = [
+                gm_move_catalog_name(move_id) for move_id in ensure_list(pokemon_settings.get("nonTmQuickMoves")) if move_id
+            ]
+            non_tm_cinematic_moves = [
+                gm_move_catalog_name(move_id) for move_id in ensure_list(pokemon_settings.get("nonTmCinematicMoves")) if move_id
+            ]
+            elite_quick_moves = list(dict.fromkeys([*elite_quick_moves, *non_tm_quick_moves]))
+            elite_cinematic_moves = list(dict.fromkeys([*elite_cinematic_moves, *non_tm_cinematic_moves]))
 
             stats_index[key] = {
                 "pokemon_id": dex,

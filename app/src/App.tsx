@@ -281,6 +281,10 @@ function isShadowFormPokemon(pokemon: PokemonEntry): boolean {
   return normalizeQuery(pokemon.form) === "shadow" || normalizeQuery(pokemon.name).startsWith("shadow ");
 }
 
+function isMegaFormPokemon(pokemon: PokemonEntry): boolean {
+  return normalizeQuery(pokemon.form) === "mega" || normalizeQuery(pokemon.name).startsWith("mega ");
+}
+
 function toShadowVariant(pokemon: PokemonEntry): PokemonEntry {
   return {
     ...pokemon,
@@ -989,6 +993,15 @@ function pvpRowIsShadow(name: string): boolean {
   return /\(\s*shadow\s*\)/i.test(name);
 }
 
+function raidRowBaseName(name: string): string {
+  return name
+    .replace(/^(shadow\s+)+/i, "")
+    .replace(/^(mega\s+)+/i, "")
+    .replace(/\s*\((?:shadow|mega)\)\s*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function resolveLocalPokemonForPvpRow(
   row: GreatLeagueCombinedRow,
   pokemonBySpeciesId: Map<string, PokemonEntry>,
@@ -1505,10 +1518,13 @@ function RaidAttackersTable({
         {displayRows.map((displayEntry) => {
           const entry = displayEntry.row;
           const isShadow = isShadowFormPokemon(entry.pokemon) || pvpRowIsShadow(entry.pokemon.name);
-          const baseDisplayName = pvpRowDisplayName(entry.pokemon.name);
+          const isMega = isMegaFormPokemon(entry.pokemon);
+          const baseDisplayName = raidRowBaseName(entry.pokemon.name);
           const rawFormLabel =
             displayEntry.forms.size > 1 ? "Various" : pokemonDisplayForm(entry.pokemon, meaningfulFormCountByName);
-          const formLabel = rawFormLabel && normalizeQuery(rawFormLabel) === "shadow" ? null : rawFormLabel;
+          const normalizedFormLabel = rawFormLabel ? normalizeQuery(rawFormLabel) : null;
+          const formLabel =
+            normalizedFormLabel === "shadow" || normalizedFormLabel === "mega" ? null : rawFormLabel;
           const isSpotlight =
             spotlightName !== null && normalizeQuery(entry.pokemon.name) === spotlightName;
           return (
@@ -1521,6 +1537,7 @@ function RaidAttackersTable({
                 <span className="pokemon-name-inline">
                   <strong>
                     {isShadow ? <em className="pvp-shadow-prefix">Shadow </em> : null}
+                    {!isShadow && isMega ? <em className="pvp-shadow-prefix">Mega </em> : null}
                     {baseDisplayName}
                   </strong>
                   {formLabel ? (
@@ -2602,12 +2619,15 @@ export default function App() {
     });
     return index;
   }, [spawnRarityRows]);
+  const meaningfulPokemon = useMemo(
+    () => pokemon.filter((entry) => !entry.derived.cosmetic_diff && normalizeQuery(entry.form) !== "eternamax"),
+    [pokemon],
+  );
   const visiblePokemon = useMemo(() => {
-    const meaningfulPool = pokemon.filter((entry) => !entry.derived.cosmetic_diff);
     return excludeLimitedPokemon
-      ? meaningfulPool.filter((entry) => !LIMITED_POKEMON.has(normalizeQuery(entry.name)))
-      : meaningfulPool;
-  }, [excludeLimitedPokemon, pokemon]);
+      ? meaningfulPokemon.filter((entry) => !LIMITED_POKEMON.has(normalizeQuery(entry.name)))
+      : meaningfulPokemon;
+  }, [excludeLimitedPokemon, meaningfulPokemon]);
   const meaningfulFormCountByName = useMemo(() => {
     const counts = new Map<string, number>();
     visiblePokemon.forEach((entry) => {
@@ -3067,6 +3087,47 @@ export default function App() {
     });
   }, [search, selectedTypes, visiblePokemon]);
 
+  const raidIncludePool = useMemo(() => {
+    if (mode !== "raid") {
+      return [];
+    }
+    const megaByDex = new Map<number, MegaPokemonEntry[]>();
+    state.megaPokemonEntries.forEach((mega) => {
+      const dex = Number(mega.pokemon_id);
+      if (!Number.isFinite(dex)) {
+        return;
+      }
+      const current = megaByDex.get(dex) ?? [];
+      current.push(mega);
+      megaByDex.set(dex, current);
+    });
+    const canonicalShadowDexes = new Set(state.shadowPokemonDexIds);
+    const variants: PokemonEntry[] = [];
+    if (includeShadowAttackers) {
+      visiblePokemon
+        .filter((entry) => !isShadowFormPokemon(entry) && canonicalShadowDexes.has(entry.dex))
+        .forEach((entry) => variants.push(toShadowVariant(entry)));
+    }
+    if (includeMegaAttackers) {
+      visiblePokemon
+        .filter((entry) => !isShadowFormPokemon(entry))
+        .flatMap((entry) => (megaByDex.get(entry.dex) ?? []).map((mega) => toMegaVariant(entry, mega)))
+        .forEach((entry) => variants.push(entry));
+    }
+    const byKey = new Map<string, PokemonEntry>();
+    [...visiblePokemon, ...variants].forEach((entry) => {
+      byKey.set(pokemonKey(entry), entry);
+    });
+    return Array.from(byKey.values());
+  }, [
+    includeMegaAttackers,
+    includeShadowAttackers,
+    mode,
+    state.megaPokemonEntries,
+    state.shadowPokemonDexIds,
+    visiblePokemon,
+  ]);
+
   const raidIncludeOptions = useMemo(() => {
     if (mode !== "raid") {
       return [];
@@ -3077,23 +3138,22 @@ export default function App() {
       return [];
     }
 
-    return visiblePokemon
+    return raidIncludePool
       .filter((entry) => {
         return (
-          normalizeQuery(entry.name).includes(query) ||
-          normalizeQuery(entry.form).includes(query) ||
+          normalizeQuery(raidRowBaseName(entry.name)).includes(query) ||
           String(entry.dex).includes(query)
         );
       })
       .slice(0, 8);
-  }, [mode, raidIncludeSearch, visiblePokemon]);
+  }, [mode, raidIncludePool, raidIncludeSearch]);
 
   const raidIncludePokemon = useMemo(() => {
     if (mode !== "raid" || !raidIncludeKey) {
       return null;
     }
-    return visiblePokemon.find((entry) => pokemonKey(entry) === raidIncludeKey) ?? null;
-  }, [mode, raidIncludeKey, visiblePokemon]);
+    return raidIncludePool.find((entry) => pokemonKey(entry) === raidIncludeKey) ?? null;
+  }, [mode, raidIncludeKey, raidIncludePool]);
 
   useEffect(() => {
     if (mode !== "raid") {
@@ -3107,13 +3167,13 @@ export default function App() {
   }, [mode, raidIncludeDraftKey, raidIncludeOptions]);
 
   const raidBossOptions = useMemo(
-    () => filterRaidBosses(bossSourceFilter, visiblePokemon, state.raidBossesData, pokemonSpeciesRows),
-    [bossSourceFilter, pokemonSpeciesRows, state.raidBossesData, visiblePokemon],
+    () => filterRaidBosses(bossSourceFilter, meaningfulPokemon, state.raidBossesData, pokemonSpeciesRows),
+    [bossSourceFilter, meaningfulPokemon, pokemonSpeciesRows, state.raidBossesData],
   );
 
   const raidBossGroups = useMemo(
-    () => groupRaidBosses(raidBossOptions, bossSourceFilter, visiblePokemon),
-    [bossSourceFilter, raidBossOptions, visiblePokemon],
+    () => groupRaidBosses(raidBossOptions, bossSourceFilter, meaningfulPokemon),
+    [bossSourceFilter, meaningfulPokemon, raidBossOptions],
   );
 
   const selectedRaidBossOption = useMemo(() => {
@@ -3153,7 +3213,7 @@ export default function App() {
     if (!resolvedRaidBoss) {
       return [];
     }
-    const baseAttackPool = visiblePokemon.filter(
+    const baseAttackPool = meaningfulPokemon.filter(
       (entry) => entry.evolution.is_final_evolution || entry.evolution.line_names.length === 1,
     );
     const canonicalShadowDexes = new Set(state.shadowPokemonDexIds);
@@ -3200,12 +3260,15 @@ export default function App() {
     raidSimulationMode,
     state.megaPokemonEntries,
     state.shadowPokemonDexIds,
-    visiblePokemon,
+    meaningfulPokemon,
     typeEffectiveness,
   ]);
 
   const visibleRaidAttackers = useMemo(() => {
     return raidAttackers.filter((entry) => {
+      if (excludeLimitedPokemon && LIMITED_POKEMON.has(normalizeQuery(entry.pokemon.name))) {
+        return false;
+      }
       if (!includeShadowAttackers && isShadowFormPokemon(entry.pokemon)) {
         return false;
       }
@@ -3214,7 +3277,7 @@ export default function App() {
       }
       return true;
     });
-  }, [includeMegaAttackers, includeShadowAttackers, raidAttackers]);
+  }, [excludeLimitedPokemon, includeMegaAttackers, includeShadowAttackers, raidAttackers]);
 
   const statsFilteredPokemon = useMemo(() => {
     if (!statsGenerationFilter.length) {
@@ -3350,13 +3413,13 @@ export default function App() {
     if (mode !== "raid") {
       return;
     }
-    if (raidIncludeDraftKey && !visiblePokemon.some((entry) => pokemonKey(entry) === raidIncludeDraftKey)) {
+    if (raidIncludeDraftKey && !raidIncludePool.some((entry) => pokemonKey(entry) === raidIncludeDraftKey)) {
       setRaidIncludeDraftKey(null);
     }
-    if (raidIncludeKey && !visiblePokemon.some((entry) => pokemonKey(entry) === raidIncludeKey)) {
+    if (raidIncludeKey && !raidIncludePool.some((entry) => pokemonKey(entry) === raidIncludeKey)) {
       setRaidIncludeKey(null);
     }
-  }, [mode, raidIncludeDraftKey, raidIncludeKey, visiblePokemon]);
+  }, [mode, raidIncludeDraftKey, raidIncludeKey, raidIncludePool]);
 
   useEffect(() => {
     if (!bossKey) {
@@ -3491,9 +3554,15 @@ export default function App() {
                       return;
                     }
                     if (raidIncludeDraftKey) {
-                      const selected = visiblePokemon.find((entry) => pokemonKey(entry) === raidIncludeDraftKey) ?? null;
-                      const resolved = selected ? resolvePrimaryFinalEvolution(selected, visiblePokemon) : null;
-                      if (resolved) {
+                      const selected = raidIncludePool.find((entry) => pokemonKey(entry) === raidIncludeDraftKey) ?? null;
+                      if (selected) {
+                        const resolved =
+                          isShadowFormPokemon(selected) || isMegaFormPokemon(selected)
+                            ? selected
+                            : resolvePrimaryFinalEvolution(selected, visiblePokemon);
+                        if (!resolved) {
+                          return;
+                        }
                         setRaidIncludeKey(pokemonKey(resolved));
                         setRaidIncludeDraftKey(null);
                         setRaidIncludeSearch("");
@@ -3516,6 +3585,12 @@ export default function App() {
                 <div className="raid-include-list">
                   {raidIncludeOptions.map((entry) => {
                     const isSelected = raidIncludeDraftKey === pokemonKey(entry);
+                    const isShadow = isShadowFormPokemon(entry);
+                    const isMega = isMegaFormPokemon(entry);
+                    const rawFormLabel = pokemonDisplayForm(entry, meaningfulFormCountByName);
+                    const normalizedFormLabel = rawFormLabel ? normalizeQuery(rawFormLabel) : null;
+                    const formLabel =
+                      normalizedFormLabel === "shadow" || normalizedFormLabel === "mega" ? null : rawFormLabel;
                     return (
                       <button
                         key={pokemonKey(entry)}
@@ -3524,9 +3599,11 @@ export default function App() {
                         onClick={() => setRaidIncludeDraftKey(pokemonKey(entry))}
                       >
                         <span>
-                          {entry.name}
-                          {pokemonDisplayForm(entry, meaningfulFormCountByName) ? (
-                            <span className="pokemon-form-inline"> ({pokemonDisplayForm(entry, meaningfulFormCountByName)})</span>
+                          {isShadow ? "Shadow " : null}
+                          {!isShadow && isMega ? "Mega " : null}
+                          {raidRowBaseName(entry.name)}
+                          {formLabel ? (
+                            <span className="pokemon-form-inline"> ({formLabel})</span>
                           ) : null}
                         </span>
                       </button>
@@ -3565,18 +3642,20 @@ export default function App() {
             </label>
           )}
 
-          <label className="toggle-field">
-            <input
-              type="checkbox"
-              checked={mode === "pvp" ? excludePvpEliteMovesetPokemon : excludeLimitedPokemon}
-              onChange={(event) =>
-                mode === "pvp"
-                  ? setExcludePvpEliteMovesetPokemon(event.target.checked)
-                  : setExcludeLimitedPokemon(event.target.checked)
-              }
-            />
-            <span>{mode === "pvp" ? "Exclude Elite TM movesets" : "Exclude limited/event-only Pokemon"}</span>
-          </label>
+          {mode !== "raid" ? (
+            <label className="toggle-field">
+              <input
+                type="checkbox"
+                checked={mode === "pvp" ? excludePvpEliteMovesetPokemon : excludeLimitedPokemon}
+                onChange={(event) =>
+                  mode === "pvp"
+                    ? setExcludePvpEliteMovesetPokemon(event.target.checked)
+                    : setExcludeLimitedPokemon(event.target.checked)
+                }
+              />
+              <span>{mode === "pvp" ? "Exclude Elite TM movesets" : "Exclude limited/event-only Pokemon"}</span>
+            </label>
+          ) : null}
           {mode === "pvp" ? (
             <label className="toggle-field">
               <input
@@ -4060,6 +4139,16 @@ export default function App() {
                     startRaidToggleTransition(() => {
                       setIncludeMegaAttackers(checked);
                     });
+                  }}
+                />
+              </label>
+              <label className="field checkbox-row">
+                <span>Include limited/event-only Pokemon</span>
+                <input
+                  type="checkbox"
+                  checked={!excludeLimitedPokemon}
+                  onChange={(event) => {
+                    setExcludeLimitedPokemon(!event.target.checked);
                   }}
                 />
               </label>

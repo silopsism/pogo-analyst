@@ -466,8 +466,10 @@ function draftCurrentRaidEntry(
 ): RaidBossCatalogEntry {
   const bucket = bucketFromTierKey(tierKey, raidBoss.tier);
   const isMega = bucket === "Mega";
-  const resolvedName = isMega ? `Mega ${raidBoss.name}` : raidBoss.name;
-  const resolvedForm = isMega ? "Mega" : displayFormFromApi(raidBoss.form || "Normal");
+  const isShadow = normalizeFormToken(raidBoss.form || "") === "shadow" || /^shadow\s+/i.test(raidBoss.name);
+  const baseName = raidBoss.name.replace(/^shadow\s+/i, "").replace(/^mega\s+/i, "").trim() || raidBoss.name;
+  const resolvedName = isMega ? `Mega ${baseName}` : isShadow ? `Shadow ${baseName}` : baseName;
+  const resolvedForm = isMega ? "Mega" : isShadow ? "Shadow" : displayFormFromApi(raidBoss.form || "Normal");
   const foundPokemon = findPokemonByNameAndForm(allPokemon, raidBoss.name, raidBoss.form || "Normal");
   const proxyTypes = raidBoss.type?.length ? raidBoss.type : foundPokemon?.types;
   const key = makeKey(resolvedName, resolvedForm);
@@ -486,11 +488,13 @@ function draftCurrentRaidEntry(
     currentRotation: true,
     speciesName: resolvedName,
     speciesForm: resolvedForm,
-    proxyBaseSpecies: isMega ? raidBoss.name : undefined,
+    proxyBaseSpecies: isMega || isShadow ? baseName : undefined,
     proxyTypes,
     proxyNote: isMega
-      ? `Mega ${raidBoss.name} uses a proxy profile based on ${raidBoss.name} until mega-form boss data is available locally.`
-      : undefined,
+      ? `Mega ${baseName} uses a proxy profile based on ${baseName} until mega-form boss data is available locally.`
+      : isShadow
+        ? `Shadow ${baseName} uses a proxy profile based on ${baseName} until shadow-form boss data is available locally.`
+        : undefined,
   };
 }
 
@@ -677,7 +681,12 @@ export function resolveRaidBoss(entry: RaidBossCatalogEntry, allPokemon: Pokemon
     return { catalog: entry, pokemon: exact, isProxy: false, note: null };
   }
 
-  const fallbackName = entry.proxyBaseSpecies ?? entry.speciesName;
+  const fallbackName =
+    entry.proxyBaseSpecies ??
+    entry.speciesName
+      .replace(/^shadow\s+/i, "")
+      .replace(/^mega\s+/i, "")
+      .trim();
   const fallback = preferredByName(fallbackName, allPokemon);
   if (!fallback) {
     return null;

@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npm run build && cp -r data dist/data
 
 # --- serve stage: static files via nginx ---
 FROM nginx:alpine

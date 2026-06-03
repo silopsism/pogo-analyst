@@ -4,11 +4,16 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build && cp -r data dist/data
+RUN npm run build
 
-# --- serve stage: static files via nginx ---
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# --- serve stage: small Python backend serves the app + data + pvpoke refresh ---
+FROM python:3.12-slim
+WORKDIR /app
+RUN pip install --no-cache-dir flask gunicorn requests
+COPY --from=build /app/dist ./dist
+COPY data ./data
+COPY scripts ./scripts
+COPY server.py ./server.py
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# -w 2 workers, long timeout so the on-demand pvpoke fetch isn't killed mid-run
+CMD ["gunicorn", "-b", "0.0.0.0:80", "-w", "2", "-t", "600", "server:app"]
